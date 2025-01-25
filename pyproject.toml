@@ -59,7 +59,7 @@ dev = [
 line-length = 120
 show-fixes = true
 src = ["src", "tests"]
-exclude = ["*.ipynb", "stubs", "examples"]
+exclude = ["*.ipynb", "stubs", "examples", "docs"]
 
 
 [tool.ruff.lint]

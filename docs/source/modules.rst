@@ -1,5 +1,5 @@
-py-tika
-=======
+tikara
+======
 
 .. toctree::
    :maxdepth: 4

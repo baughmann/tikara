@@ -68,6 +68,7 @@ html_theme_options = {
     "show_breadcrumbs": True,
     "show_prev_next": True,
     "show_toc_level": 3,
+    "navbar_title": "tikara",
 }
 
 # Enable todos

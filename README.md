@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/images/tikara_logo.svg" alt="Tikara Logo" style="width:100px;"/>
+<img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/tikara_logo.svg" alt="Tikara Logo" style="width:100px;"/>
 
 # Tikara
 
@@ -1698,6 +1698,8 @@
 
 ### What can I do with this?
 
+[Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/examples)
+
 #### File Content and Metadata Extraction
 
 At its core, `tikara` is focused on extracting structured or unstructured text from almost any file type. Whether you to read PowerPoints, PDFs or run OCR on images.
@@ -1713,6 +1715,10 @@ If you are dealing with extremely large files, you can also stream the content:
 To a file:
 
 ```python
+from tikara import Tika
+
+tika = Tika()
+
 output_file, metadata_dict = tika.parse("path/to/file", output_file=Path("path/to/output")) # content: Path, metadata: dict[str, Any]
 ```
 
