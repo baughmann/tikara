@@ -1775,7 +1775,8 @@ tika = Tika()
  documents = tika.unpack("path/to/my/my_doc.docx", output_dir=Path("/my/output/dir"))
 ```
 
-> [!NOTE] > _Many_ documents can have sever layers of embedded documents. Think a Word document, with an embedded PowerPoint, with an embedded PDF with an Embedded ZIP with an embedded image. That's crazy!
+> [!NOTE]
+> _Many_ documents can have sever layers of embedded documents. Think a Word document, with an embedded PowerPoint, with an embedded PDF with an Embedded ZIP with an embedded image. That's crazy!
 
 ### How does this work?
 
