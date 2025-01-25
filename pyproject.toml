@@ -1,6 +1,6 @@
 [project]
 name = "tikara"
-version = "0.1.2"
+version = "0.1.3"
 description = "The metadata and text content extractor for almost every file type."
 readme = "README.md"
 authors = [{ name = "Nick Baughman", email = "baughmann1@gmail.com" }]
