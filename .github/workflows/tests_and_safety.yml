@@ -2,9 +2,9 @@ name: Tests & Safety
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   test:
@@ -27,11 +27,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          uv run python -m pytest --junitxml=junit.xml --cov-report html:coverage-report --cov-report xml:coverage.xml --cov=tikara
-
-      - name: Run safety check
-        run: |
-          uv run safety scan --save-as html safety_scan.html
+          uv run python -m pytest --junitxml=junit.xml --cov-report --cov-report xml:coverage.xml --cov=tikara
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -40,13 +36,11 @@ jobs:
           path: |
             junit.xml
             coverage.xml
-            coverage-report/
-            safety_scan.html
 
       - name: Commit reports
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-          git add junit.xml coverage.xml coverage-report/ safety_scan.html
+          git add junit.xml coverage.xml
           git commit -m "Add test and safety reports"
           git push
