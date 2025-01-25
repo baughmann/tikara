@@ -1,0 +1,311 @@
+import io
+import re
+from pathlib import Path
+from typing import Any, BinaryIO, Literal
+
+import pytest
+import requests
+from testcontainers.core.container import DockerContainer
+
+from tikara import Tika
+
+SKIP_METADATA_KEYS: set[str] = {
+    "X-TIKA:Parsed-By-Full-Set",
+    "Content-Type-Override",
+    "language",
+    "Content-Length",
+    "X-TIKA:content",
+    "X-TIKA:content_handler",
+    "X-TIKA:parse_time_millis",
+    "X-TIKA:embedded_depth",
+}
+
+
+@pytest.mark.parametrize("input_type", ["string", "path", "bytes", "stream"])
+def test_parse_to_string_input_types(
+    tika: Tika, demo_docx: Path, input_type: Literal["string", "path", "bytes", "stream"]
+) -> None:
+    input_obj: str | Path | bytes | BinaryIO
+    match input_type:
+        case "string":
+            input_obj = str(demo_docx)
+        case "path":
+            input_obj = demo_docx
+        case "bytes":
+            input_obj = demo_docx.read_bytes()
+        case "stream":
+            input_obj = io.BytesIO(demo_docx.read_bytes())
+
+    content, metadata = tika.parse(input_obj)
+    assert content
+    assert metadata
+    assert metadata["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+@pytest.mark.parametrize("output_format", ["txt", "xhtml"])
+@pytest.mark.parametrize("input_type", ["string", "path", "bytes", "stream"])
+def test_parse_to_file_combinations(
+    tika: Tika,
+    demo_docx: Path,
+    tmp_path: Path,
+    input_type: Literal["string", "path", "bytes", "stream"],
+    output_format: Literal["txt", "xhtml"],
+) -> None:
+    input_obj: str | Path | bytes | BinaryIO
+    match input_type:
+        case "string":
+            input_obj = str(demo_docx)
+        case "path":
+            input_obj = demo_docx
+        case "bytes":
+            input_obj = demo_docx.read_bytes()
+        case "stream":
+            input_obj = io.BytesIO(demo_docx.read_bytes())
+
+    output_file = tmp_path / f"output.{output_format}"
+    file_path, metadata = tika.parse(
+        input_obj,
+        output_file=output_file,
+        output_format=output_format,
+    )
+
+    assert file_path
+    assert file_path.exists()
+    assert metadata["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    with open(file_path) as f:
+        content = f.read()
+        assert content
+
+
+@pytest.mark.parametrize("output_format", ["txt", "xhtml"])
+@pytest.mark.parametrize("input_type", ["string", "path", "bytes", "stream"])
+@pytest.mark.parametrize(
+    "content_type", [None, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+)
+def test_parse_to_stream_with_content_type(
+    tika: Tika,
+    demo_docx: Path,
+    input_type: Literal["string", "path", "bytes", "stream"],
+    output_format: Literal["txt", "xhtml"],
+    content_type: str | None,
+) -> None:
+    input_obj: str | Path | bytes | BinaryIO
+    match input_type:
+        case "string":
+            input_obj = str(demo_docx)
+        case "path":
+            input_obj = demo_docx
+        case "bytes":
+            input_obj = demo_docx.read_bytes()
+        case "stream":
+            input_obj = io.BytesIO(demo_docx.read_bytes())
+
+    stream, metadata = tika.parse(
+        input_obj,
+        output_stream=True,
+        output_format=output_format,
+        content_type=content_type,
+    )
+
+    assert stream
+    assert metadata["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    content = stream.read().decode()
+    assert content
+
+
+def test_parse_with_invalid_input(tika: Tika) -> None:
+    with pytest.raises(TypeError, match="Unsupported input type"):
+        tika.parse(123)  # type: ignore  # noqa: PGH003
+
+
+def test_parse_with_nonexistent_file(tika: Tika) -> None:
+    with pytest.raises(FileNotFoundError):
+        tika.parse(Path("nonexistent.docx"))
+
+
+@pytest.mark.parametrize("output_format", ["invalid", "pdf", "doc"])
+def test_parse_with_default_output_format(tika: Tika, demo_docx: Path, output_format: str) -> None:
+    content, _ = tika.parse(demo_docx, output_format=output_format)  # type: ignore  # noqa: PGH003
+    assert content
+    assert isinstance(content, str)
+
+
+@pytest.mark.parametrize(
+    ("expected_content_type", "fixture_name"),
+    [
+        ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "demo_docx"),
+        ("application/pdf", "test_pdf_child_attachments"),
+        ("text/plain", "basic_txt"),
+        ("text/html", "basic_html"),
+    ],
+)
+def test_parse_different_file_types(
+    tika: Tika,
+    request: pytest.FixtureRequest,
+    expected_content_type: str,
+    fixture_name: str,
+) -> None:
+    test_file: Path = request.getfixturevalue(fixture_name)
+    content, metadata = tika.parse(test_file)
+    assert content
+    assert expected_content_type in metadata["Content-Type"]
+
+
+@pytest.fixture
+def tika_server_parse_metadata_request_params_norecurse(tika_container: DockerContainer) -> tuple[str, dict[str, str]]:
+    host_port = tika_container.get_exposed_port(9998)
+    container_ip = tika_container.get_container_host_ip()
+    url = f"http://{container_ip}:{host_port}/rmeta"
+    headers = {
+        "Accept": "application/json",
+        "X-Tika-Skip-Embedded": "true",
+    }
+    return url, headers
+
+
+@pytest.mark.parametrize(
+    ("input_type", "fixture_name", "content_type", "expected_missing"),
+    [
+        (
+            "string",
+            "demo_docx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            [*SKIP_METADATA_KEYS],
+        ),
+        (
+            "file",
+            "demo_docx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            [*SKIP_METADATA_KEYS],
+        ),
+        (
+            "stream",
+            "demo_docx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            [*SKIP_METADATA_KEYS],
+        ),
+        (
+            "string",
+            "test_pdf_child_attachments",
+            "application/pdf",
+            [*SKIP_METADATA_KEYS],
+        ),
+        (
+            "file",
+            "test_pdf_child_attachments",
+            "application/pdf",
+            [*SKIP_METADATA_KEYS],
+        ),
+        (
+            "stream",
+            "test_pdf_child_attachments",
+            "application/pdf",
+            [*SKIP_METADATA_KEYS],
+        ),
+    ],
+)
+def test_parse_metadata_compare_with_tika_server(
+    input_type: Literal["string", "file", "stream"],
+    fixture_name: str,
+    content_type: str,
+    expected_missing: list[str],
+    tika: Tika,
+    request: pytest.FixtureRequest,
+    tika_server_parse_metadata_request_params_norecurse: tuple[str, dict[str, str]],
+) -> None:
+    """Test metadata extraction accuracy against Tika server for various file types."""
+    test_file: Path = request.getfixturevalue(fixture_name)
+
+    if expected_missing:
+        pytest.warns(UserWarning, match=f"{len(expected_missing)} metadata keys are expected to be missing")
+
+    our_metadata: dict[str, str] | None = None
+    match input_type:
+        case "string":
+            _, our_metadata = tika.parse(test_file, input_file_name=test_file.name)
+        case "file":
+            _, our_metadata = tika.parse(str(test_file.absolute()), input_file_name=test_file.name)
+        case "stream":
+            with test_file.open("rb") as f:
+                _, our_metadata = tika.parse(f, input_file_name=test_file.name)
+
+    assert our_metadata
+
+    url, headers = tika_server_parse_metadata_request_params_norecurse
+    headers["Content-Type"] = content_type
+    headers["Content-Disposition"] = f"attachment; filename={test_file.absolute()}"
+
+    response = requests.put(url, headers=headers, data=test_file.read_bytes())
+    assert response.ok
+    tika_server_metadata: dict[str, Any] = response.json()[0]
+    # drop the content key from the response
+    tika_server_metadata.pop("X-TIKA:content")
+
+    ours_has_but_not_tika = set(our_metadata.keys()) - set(tika_server_metadata.keys())
+    tika_has_but_not_ours = set(tika_server_metadata.keys()) - set(our_metadata.keys()) - set(expected_missing)
+
+    if ours_has_but_not_tika:
+        ours_friendly: dict[str, str] = {k: str(v) for k, v in our_metadata.items() if k in ours_has_but_not_tika}
+        pytest.fail(f"Ours has but Tika server does not: {ours_friendly}")
+
+    if tika_has_but_not_ours:
+        tika_friendly: dict[str, str] = {
+            k: str(v) for k, v in tika_server_metadata.items() if k in tika_has_but_not_ours
+        }
+        pytest.fail(f"Tika server has but ours does not: {tika_friendly}")
+
+    for key, value in our_metadata.items():
+        if key in expected_missing:
+            continue
+        assert value in tika_server_metadata[key], (
+            f"Value mismatch for key: {key}. Tika has: {tika_server_metadata[key]}, but we have: {value}"
+        )
+
+
+@pytest.fixture
+def tika_server_parse_content_request_params(tika_container: DockerContainer) -> tuple[str, dict[str, str]]:
+    host_port = tika_container.get_exposed_port(9998)
+    container_ip = tika_container.get_container_host_ip()
+    url = f"http://{container_ip}:{host_port}/tika"
+    return url, {}
+
+
+@pytest.mark.parametrize("input_type", ["string", "path", "bytes", "stream"])
+def test_parse_content_compare_with_tika_server(
+    tika: Tika,
+    demo_docx: Path,
+    input_type: Literal["string", "path", "bytes", "stream"],
+    tika_server_parse_content_request_params: tuple[str, dict[str, str]],
+) -> None:
+    """Compare content parsing results with Tika server."""
+    url, headers = tika_server_parse_content_request_params
+
+    input_obj: str | Path | bytes | BinaryIO
+    match input_type:
+        case "string":
+            input_obj = str(demo_docx)
+        case "path":
+            input_obj = demo_docx
+        case "bytes":
+            input_obj = demo_docx.read_bytes()
+        case "stream":
+            input_obj = io.BytesIO(demo_docx.read_bytes())
+
+    our_content, _ = tika.parse(input_obj, output_format="txt")
+
+    headers["Accept"] = "text/plain"
+    headers["X-Tika-Skip-Embedded"] = "true"
+    response = requests.put(url, headers=headers, data=demo_docx.read_bytes())
+    assert response.ok
+
+    tika_content: str = response.content.decode("utf-8")
+
+    # Normalize content for comparison
+    our_content = (
+        re.sub(r"\s+", " ", our_content).strip().rstrip().replace("\n", "").replace("\r", "").replace("\t", "")
+    )
+    tika_content = (
+        re.sub(r"\s+", " ", tika_content).strip().rstrip().replace("\n", "").replace("\r", "").replace("\t", "")
+    )
+
+    assert tika_content in our_content

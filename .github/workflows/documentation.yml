@@ -1,0 +1,63 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Generate and deploy documentation
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["master", "add-automated-documentation"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: |
+          python -m pip install uv
+
+      - name: Install dependencies with uv
+        run: |
+          uv sync
+          uv pip install -e .
+
+      - name: Sphinx APIDoc
+        run: |
+          uv run sphinx-apidoc -f -o docs/source/ src/tika
+
+      - name: Sphinx build
+        run: |
+          uv run sphinx-build -b html docs/source/ docs/build/html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./docs/build/html"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
