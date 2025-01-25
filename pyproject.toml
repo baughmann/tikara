@@ -1,6 +1,6 @@
 [project]
 name = "tikara"
-version = "0.1.3"
+dynamic = ["version"]
 description = "The metadata and text content extractor for almost every file type."
 readme = "README.md"
 authors = [{ name = "Nick Baughman", email = "baughmann1@gmail.com" }]
@@ -99,11 +99,17 @@ Homepage = "https://github.com/baughmann/tikara"
 Issues = "https://github.com/baughmann/tikara/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
 include = ["src/**"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tikara"]
