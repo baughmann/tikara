@@ -44,7 +44,7 @@ jobs:
 
       - name: Sphinx APIDoc
         run: |
-          uv run sphinx-apidoc -f -o docs/source/ src/tika
+          uv run sphinx-apidoc -f -o docs/source/ src/tikara
 
       - name: Sphinx build
         run: |
