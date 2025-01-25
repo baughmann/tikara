@@ -1,4 +1,4 @@
 from tikara.tika import Tika
-from tikara.tika_util import TikaraUnpackedItem, LanguageConfidence, TikaraDetectLanguageResult
+from tikara.tika_util import LanguageConfidence, TikaraDetectLanguageResult, TikaraUnpackedItem
 
-__all__ = ["Tika", "TikaraUnpackedItem", "LanguageConfidence", "TikaraDetectLanguageResult"]
+__all__ = ["LanguageConfidence", "Tika", "TikaraDetectLanguageResult", "TikaraUnpackedItem"]
