@@ -90,8 +90,13 @@ keywords = [
     "unstructured-data",
     "word-documents",
 ]
-
+license = "Apache-2.0"
+license-files = ["LICEN[CS]E*"]
 dependencies = ["jpype1>=1.5.1"]
+
+[project.urls]
+Homepage = "https://github.com/baughmann/tikara"
+Issues = "https://github.com/baughmann/tikara/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -192,10 +197,3 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "test/*" = ["ANN", "S", "PLR0913"]
-
-license = "Apache-2.0"
-license-files = ["LICEN[CS]E*"]
-
-[project.urls]
-Homepage = "https://github.com/baughmann/tikara"
-Issues = "https://github.com/baughmann/tikara/issues"

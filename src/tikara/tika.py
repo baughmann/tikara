@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import Any, BinaryIO, Literal, overload
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, overload
 
-from typing import TYPE_CHECKING
 from jpype import JProxy
 
 from tikara.java_util import (
@@ -22,7 +21,9 @@ from tikara.tika_util import (
 
 if TYPE_CHECKING:
     from java.io import InputStream  # type: ignore  # noqa: PGH003
+    from org.apache.tika.detect import Detector  # type: ignore  # noqa: PGH003
     from org.apache.tika.metadata import Metadata  # type: ignore  # noqa: PGH003
+    from org.apache.tika.parser import Parser  # type: ignore  # noqa: PGH003
 
 
 TikaParseOutputFormat = Literal["txt", "xhtml"]
@@ -37,7 +38,13 @@ class Tika:
             self._language_detector.loadModels()
             self._models_loaded = True
 
-    def __init__(self, *, lazy_load: bool = True) -> None:
+    def __init__(
+        self,
+        *,
+        lazy_load: bool = True,
+        custom_parsers: list["Parser"] | None = None,
+        custom_detectors: list["Detector"] | None = None,
+    ) -> None:
         """Creates a new instance of the Tika wrapper.
 
         Args:
@@ -48,14 +55,20 @@ class Tika:
 
         initialize_jvm()
 
+        custom_detectors = custom_detectors or []
+        custom_parsers = custom_parsers or []
+
         from org.apache.tika import Tika as JTika  # type: ignore  # noqa: PGH003
         from org.apache.tika.config import TikaConfig as JTikaConfig  # type: ignore  # noqa: PGH003
+        from org.apache.tika.detect import DefaultDetector  # type: ignore  # noqa: PGH003
         from org.apache.tika.language.detect import LanguageDetector  # type: ignore  # noqa: PGH003
+        from org.apache.tika.parser import AutoDetectParser, DefaultParser  # type: ignore  # noqa: PGH003
 
         self._j_tika_config = JTikaConfig.getDefaultConfig()
 
-        self._tika = JTika(self._j_tika_config)
-        self._parser = self._tika.getParser()
+        self._detector = DefaultDetector()
+        self._parser = AutoDetectParser(DefaultDetector(), DefaultParser(), *custom_parsers)
+        self._tika = JTika(self._detector, self._parser)
         self._language_detector = LanguageDetector.getDefaultLanguageDetector()
         self._models_loaded = False
 
