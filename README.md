@@ -6,8 +6,10 @@
 
 ## The digital babel fish _(now for Python)_
 
-<details open>
-<summary>1682 supported media types and counting!</summary>
+**1682 supported media types and counting!**
+
+<details>
+<summary>View all supported content types</summary>
     
     - `application/activemessage`
     - `application/andrew-inset`
