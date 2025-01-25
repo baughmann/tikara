@@ -10,19 +10,15 @@ test:
 	@uv run python -m pytest -vv -s
 
 test_coverage:
-	@uv run python -m pytest --junitxml=resources/junit/junit.xml --html=resources/junit/report.html  --cov-report term --cov-report xml:resources/coverage.xml --cov=tikara
+	@uv run python -m pytest --junitxml=junit.xml  --cov-report term --cov-report xml:coverage.xml --cov=tikara
 
 safety:
-	@uv run safety scan --save-as html resources/safety_scan.html
-
-badges:
-	@genbadge coverage -i resources/coverage.xml -o resources/images/coverage.svg
-	@genbadge tests -i resources/junit/junit.xml -o resources/images/tests.svg
+	@uv run safety scan --save-as html safety_scan.html
 
 docs:
 	@uv run sphinx-apidoc -f -o docs/source/ .
 	@uv run sphinx-build -b html docs/source/ docs/build/html
 
-prepush: ruff test test_coverage safety badges
+prepush: ruff test test_coverage safety
 
-.PHONY: stubs ruff test test_coverage safety badges docs prepush
+.PHONY: stubs ruff test test_coverage safety docs prepush

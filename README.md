@@ -1,8 +1,8 @@
-<img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/resources/images/tikara_logo.svg" alt="Tikara Logo" style="width:100px;"/>
+<img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/images/tikara_logo.svg" alt="Tikara Logo" style="width:100px;"/>
 
 # Tikara
 
-![Coverage](https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/resources/images/coverage.svg) ![Tests](https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/resources/images/tests.svg) ![PyPI](https://img.shields.io/pypi/v/tikara) ![GitHub License](https://img.shields.io/github/license/baughmann/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/baughmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/baughmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
+![Coverage](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/coverage.xml&query=/coverage/@line-rate%20*%20100&suffix=%25&color=brightgreen&label=coverage) ![Tests](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/junit.xml&query=/testsuites/testsuite/@tests&label=tests&color=green) ![PyPI](https://img.shields.io/pypi/v/tikara) ![GitHub License](https://img.shields.io/github/license/baughmann/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/baughmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/baughmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
 
 ## The digital babel fish _(now for Python)_
 
@@ -1751,7 +1751,7 @@ Recursively unpack embedded documents from any file type that supports such a th
 
 `tikara` is standing on the shoulders of giants. Firstly, the completely amazing but notoriouisly sparsely-documented [Apache Tika](https://tika.apache.org/). Secondly, the groundbreaking [jpype](https://jpype.readthedocs.io/en/latest/). `tikara` ships with an embedded version of the `Apache Tika` library (specifically, the `tika-app` JAR). It uses JPype to spin up a JVM and calls the Apache Tika library through the JNI, as proxied by JPype.
 
-There are several different Python libraries that do this in one way or another. Some are just HTTP client libraries for a Tika server like [tikara](https://pypi.org/project/tikara/), others like [tika-python](https://github.com/chrismattmann/tika-python) spin up a local Tika server and internally proxy method calls to it over HTTP. They indeed do work, and have some major benefits, but they have not been updated in some time.
+There are several different Python libraries that interact with Tika one way or another, but the vast majority of them use `tika-server` via HTTP calls. Some are just HTTP client libraries for a Tika server like [tikara](https://pypi.org/project/tikara/), others like [tika-python](https://github.com/chrismattmann/tika-python) spin up a local Tika server and internally proxy method calls to it over HTTP. They indeed do work, and have some major benefits, but they have not been updated in some time.
 
 Some notable benefits of the libraries above are process isolation. In `tika-python`, if Tika crashes, it doesn't take your application with it: the Apache Tika server crashes and the library can just start a new one. With `tikara`, if the Tika library crashes, your application crashes.
 
