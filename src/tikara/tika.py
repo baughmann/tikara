@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, BinaryIO, Literal, overload
 
-from git import TYPE_CHECKING
+from typing import TYPE_CHECKING
 from jpype import JProxy
 
 from tikara.java_util import (

@@ -4,7 +4,7 @@ from typing import BinaryIO, cast
 from unittest.mock import Mock
 
 import pytest
-from git import TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from tikara.tika_util import (
     LanguageConfidence,
