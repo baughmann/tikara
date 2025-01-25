@@ -1700,11 +1700,19 @@
 
 [Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/examples)
 
+```shell
+pip install tikara
+```
+
 #### File Content and Metadata Extraction
 
 At its core, `tikara` is focused on extracting structured or unstructured text from almost any file type. Whether you to read PowerPoints, PDFs or run OCR on images.
 
 ```python
+from tikara import Tika
+
+tika = Tika()
+
 content_str, metadata_dict = tika.parse("path/to/file") # content: str, metadata: dict[str, Any]
 ```
 
@@ -1725,6 +1733,10 @@ output_file, metadata_dict = tika.parse("path/to/file", output_file=Path("path/t
 Or get a byte stream (that you can use to stream the data to S3 or anything else)
 
 ```python
+from tikara import Tika
+
+tika = Tika()
+
 output_file, metadata_dict = tika.parse("path/to/file", output_stream=True) # content: BinaryIO, metadata: dict[str, Any]
 ```
 
@@ -1734,12 +1746,20 @@ output_file, metadata_dict = tika.parse("path/to/file", output_stream=True) # co
 #### Language Detection
 
 ```python
+from tikara import Tika
+
+tika = Tika()
+
 lang: str = tika.detect_language("El rápido zorro marrón salta sobre el perro perezoso") # 'es'
 ```
 
 #### Content Type Detection (using file extensions, magic bytes, and more)
 
 ```python
+from tikara import Tika
+
+tika = Tika()
+
 content_type: str = tika.detect_mime_type("path/to/my/doc.pdf") # 'application/pdf'
 ```
 
@@ -1748,6 +1768,10 @@ content_type: str = tika.detect_mime_type("path/to/my/doc.pdf") # 'application/p
 Recursively unpack embedded documents from any file type that supports such a thing. For example, ZIPs/TARs, PDFs, Word documents, etc.
 
 ```python
+from tikara import Tika
+
+tika = Tika()
+
  documents = tika.unpack("path/to/my/my_doc.docx", output_dir=Path("/my/output/dir"))
 ```
 
