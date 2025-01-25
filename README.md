@@ -1753,7 +1753,7 @@ tika = Tika()
 lang: str = tika.detect_language("El rápido zorro marrón salta sobre el perro perezoso") # 'es'
 ```
 
-#### Content Type Detection (using file extensions, magic bytes, and more)
+#### 🆎 Content Type Detection (using file extensions, magic bytes, and more)
 
 ```python
 from tikara import Tika
