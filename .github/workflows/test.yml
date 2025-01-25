@@ -38,9 +38,9 @@ jobs:
             coverage.xml
 
       - name: Commit reports
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git add junit.xml coverage.xml
-          git commit -m "Add test and safety reports"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Add test, benchmark and coverage reports
+          branch: ${{ github.ref }}
+          commit_user_name: Tikara Test Bot
+          commit_user_email: tikara-test-bot@example.org
