@@ -9,8 +9,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,6 +45,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Add test, benchmark and coverage reports
-          branch: ${{ github.ref }}
+          file_pattern: junit.xml coverage.xml
           commit_user_name: Tikara Test Bot
-          commit_user_email: tikara-test-bot@example.org
