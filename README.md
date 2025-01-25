@@ -1700,7 +1700,7 @@
 
 [Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/examples)
 
-```shell
+```sh
 pip install tikara
 ```
 
