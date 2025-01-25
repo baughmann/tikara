@@ -1,4 +1,4 @@
-name: Tests & Safety
+name: Tests
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          uv run python -m pytest --junitxml=junit.xml --cov-report --cov-report xml:coverage.xml --cov=tikara
+          uv run python -m pytest --junitxml=junit.xml --cov-report xml:coverage.xml --cov=tikara
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
