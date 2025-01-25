@@ -1696,15 +1696,13 @@
 
 </details>
 
-### What can I do with this?
-
 [Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/examples) 📔
 
 ```sh
 pip install tikara
 ```
 
-#### 📖 File Content and Metadata Extraction
+## 📖 File Content and Metadata Extraction
 
 At its core, `tikara` is focused on extracting structured or unstructured text from almost any file type. Whether you to read PowerPoints, PDFs or run OCR on images.
 
@@ -1743,7 +1741,7 @@ output_file, metadata_dict = tika.parse("path/to/file", output_stream=True) # co
 > [!TIP]
 > the `parse()` and `unpack()` methods both accept `content_type: str` and `input_file_name: str`. Provide these when you can to help tika discover more metadata about your documents. Obviously, if your input is a `Path` then the `input_file_name` is inferred.
 
-#### 🌎 Language Detection
+## 🌎 Language Detection
 
 ```python
 from tikara import Tika
@@ -1753,7 +1751,7 @@ tika = Tika()
 lang: str = tika.detect_language("El rápido zorro marrón salta sobre el perro perezoso") # 'es'
 ```
 
-#### 🆎 Content Type Detection (using file extensions, magic bytes, and more)
+## 🆎 Content Type Detection (using file extensions, magic bytes, and more)
 
 ```python
 from tikara import Tika
@@ -1763,7 +1761,7 @@ tika = Tika()
 content_type: str = tika.detect_mime_type("path/to/my/doc.pdf") # 'application/pdf'
 ```
 
-#### 🗃️ Recursive Unpacking
+## 🗃️ Recursive Unpacking
 
 Recursively unpack embedded documents from any file type that supports such a thing. For example, ZIPs/TARs, PDFs, Word documents, etc.
 
@@ -1778,7 +1776,7 @@ tika = Tika()
 > [!NOTE]
 > Many documents can have several layers of embedded documents. Think a Word document, with an embedded PowerPoint, with an embedded PDF with an Embedded ZIP with an embedded image. That's crazy!
 
-### 🤔 How does this work?
+## 🤔 How does this work?
 
 `tikara` is standing on the shoulders of giants. Firstly, the completely amazing but notoriouisly sparsely-documented [Apache Tika](https://tika.apache.org/). Secondly, the groundbreaking [jpype](https://jpype.readthedocs.io/en/latest/). `tikara` ships with an embedded version of the `Apache Tika` library (specifically, the `tika-app` JAR). It uses JPype to spin up a JVM and calls the Apache Tika library through the JNI, as proxied by JPype.
 
@@ -1786,14 +1784,14 @@ There are several different Python libraries that interact with Tika one way or 
 
 Some notable benefits of the libraries above are process isolation. In `tika-python`, if Tika crashes, it doesn't take your application with it: the Apache Tika server crashes and the library can just start a new one. With `tikara`, if the Tika library crashes, your application crashes.
 
-### 👍 When should I use `tikara`?
+## 👍 When should I use `tikara`?
 
 - You want to use Apache Tika in your Python, but you want good type hints.
 - You want to deploy a Python microservice or [Ray](https://ray.io) actor/serve deployment and want to use Tika as part of your content extraction pipeline, but don't want to manage a bunch of Apache Tika servers.
 - You want to use Apache Tika in a [Dask](https://dask.org) or [Prefect](https://www.prefect.io) pipeline and don't want to manage a bunch of Apache Tika servers.
 - You want to use Apache Tika for document and content extraction without the hassle of standing up a Tika server/Docker container
 
-### 🚫 When should I not use `tikara`?
+## 🚫 When should I not use `tikara`?
 
 - You are planning to use it in a large application without any process isolation (i.e., not in a microservice).
 
