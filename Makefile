@@ -1,5 +1,5 @@
 stubs:
-	@uv run python -m stubgenj --classpath "src/tikara/jars/tika-app-3.0.0.jar" --convert-strings org.apache.tika java org.apache.commons org.w3c.dom org.xml.sax --output-dir stubs --no-stubs-suffix
+	@uv run python -m stubgenj --classpath "src/tikara/jars/tika-app-3.0.0.jar" --convert-strings org.apache.tika java org.apache.commons org.w3c.dom org.xml.sax javax.xml javax.accessibility javax.crypto org.apache.poi --output-dir stubs --no-stubs-suffix
 # no idea why it generates stubs for jpype, but we have to remove them
 	@rm -rf stubs/jpype-stubs
 

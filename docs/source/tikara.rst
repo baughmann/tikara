@@ -4,10 +4,10 @@ tikara package
 Submodules
 ----------
 
-tikara.java_util module
+tikara.util.java module
 --------------------------
 
-.. automodule:: tikara.java_util
+.. automodule:: tikara.util.java
    :members:
    :undoc-members:
    :show-inheritance:
@@ -20,10 +20,10 @@ tikara.tika module
    :undoc-members:
    :show-inheritance:
 
-tikara.tika_util module
+tikara.util.tika module
 --------------------------
 
-.. automodule:: tikara.tika_util
+.. automodule:: tikara.util.tika
    :members:
    :undoc-members:
    :show-inheritance:

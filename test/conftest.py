@@ -5,13 +5,20 @@ import pytest
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.waiting_utils import wait_for_logs
 
-from tikara.java_util import initialize_jvm
-from tikara.tika import Tika
+from tikara.core import Tika
+from tikara.util.java import initialize_jvm
 
 
 @pytest.fixture(autouse=True)
 def jvm() -> None:
     initialize_jvm()
+
+
+@pytest.fixture
+def readme() -> Path:
+    path = Path("./README.md")
+    assert path.exists()
+    return path
 
 
 @pytest.fixture

@@ -1,13 +1,18 @@
 import io
 import re
 from pathlib import Path
-from typing import Any, BinaryIO, Literal
+from typing import TYPE_CHECKING, Any, BinaryIO, ClassVar, Literal
 
 import pytest
 import requests
+from jpype import JImplements, JOverride, JString
 from testcontainers.core.container import DockerContainer
 
 from tikara import Tika
+
+if TYPE_CHECKING:
+    from org.apache.tika.detect import Detector
+    from org.apache.tika.parser import Parser
 
 SKIP_METADATA_KEYS: set[str] = {
     "X-TIKA:Parsed-By-Full-Set",
@@ -309,3 +314,115 @@ def test_parse_content_compare_with_tika_server(
     )
 
     assert tika_content in our_content
+
+
+@pytest.fixture
+def custom_parser() -> "Parser":
+    def get_parsers() -> list["Parser"]:
+        from xml.sax import ContentHandler
+
+        from java.io import InputStream
+        from java.util import HashSet
+        from org.apache.tika.metadata import Metadata
+        from org.apache.tika.mime import MediaType
+        from org.apache.tika.parser import ParseContext, Parser
+
+        @JImplements(Parser)
+        class MarkdownParser:
+            def __init__(self) -> None:
+                self.supported_types = HashSet()
+                self.supported_types.add(MediaType.parse("text/markdown"))
+
+            @JOverride
+            def getSupportedTypes(self, context: ParseContext) -> HashSet:  # noqa: N802
+                return self.supported_types
+
+            @JOverride
+            def parse(
+                self, stream: InputStream, handler: ContentHandler, metadata: Metadata, context: ParseContext
+            ) -> None:
+                bytes_array = bytearray()
+                byte = stream.read()
+                while byte != -1:
+                    bytes_array.append(byte)
+                    byte = stream.read()
+
+                content = bytes_array.decode("utf-8")
+
+                # Convert to Java char array using JClass
+                chars = JString(content).toCharArray()
+
+                handler.startDocument()
+                handler.characters(chars, 0, len(chars))  # type: ignore  # noqa: PGH003
+                handler.endDocument()
+
+        return [MarkdownParser()]
+
+    return get_parsers()[0]
+
+
+@pytest.fixture
+def custom_detector() -> "Detector":
+    def get_detectors() -> list["Detector"]:
+        from java.io import InputStream
+        from org.apache.tika.detect import Detector
+        from org.apache.tika.metadata import Metadata, TikaCoreProperties
+        from org.apache.tika.mime import MediaType
+
+        @JImplements(Detector)
+        class MarkdownDetector:
+            file_endings: ClassVar[list[str]] = [".md", ".mdx"]
+            mime_type: ClassVar[str] = "text/markdown"
+
+            @JOverride
+            def detect(self, input_stream: InputStream, metadata: Metadata) -> MediaType:
+                # simply check the file extension
+                file_name = str(metadata.get(TikaCoreProperties.RESOURCE_NAME_KEY)) or None
+                if file_name and file_name.endswith(tuple(self.file_endings)):
+                    metadata.set(Metadata.CONTENT_TYPE, self.mime_type)
+                    return MediaType.parse(self.mime_type)
+
+                # if we cant figure it out, return the default and tika will try the other detectors
+                return MediaType.OCTET_STREAM
+
+        return [MarkdownDetector()]
+
+    return get_detectors()[0]
+
+
+@pytest.mark.parametrize(
+    ("fixture_name", "expected_mime_type", "expected_parser_name_pattern"),
+    [
+        (
+            "demo_docx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "DefaultParser",
+        ),
+        (
+            "readme",
+            "text/markdown",
+            "jdk.proxy",
+        ),
+    ],
+)
+def test_parse_custom_parser_and_detector(
+    fixture_name: str,
+    expected_mime_type: str,
+    expected_parser_name_pattern: str,
+    request: pytest.FixtureRequest,
+    custom_parser: "Parser",
+    custom_detector: "Detector",
+) -> None:
+    test_file: Path = request.getfixturevalue(fixture_name)
+
+    tika = Tika(
+        custom_parsers=[custom_parser],
+        custom_detectors=[custom_detector],
+        custom_mime_types=["text/markdown"],
+    )
+
+    content, metadata = tika.parse(test_file)
+    assert content
+    assert metadata
+    assert expected_mime_type in metadata["Content-Type"]
+    assert expected_parser_name_pattern in metadata["X-TIKA:Parsed-By"]

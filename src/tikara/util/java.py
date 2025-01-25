@@ -2,7 +2,6 @@ import os
 from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
-from functools import lru_cache
 from io import BufferedIOBase, UnsupportedOperation
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, BinaryIO, TypeGuard, cast, override
@@ -12,7 +11,7 @@ import jpype.imports
 from jpype.types import JArray, JChar, JString
 
 if TYPE_CHECKING:
-    from java.io import (  # type: ignore  # noqa: PGH003
+    from java.io import (
         ByteArrayOutputStream,
         FileOutputStream,
         InputStream,
@@ -26,8 +25,7 @@ if TYPE_CHECKING:
 TIKA_VERSION = "3.0.0"
 
 
-@lru_cache(maxsize=1)
-def get_jars(tika_version: str) -> list[Path]:
+def get_jars() -> list[Path]:
     """Get path to bundled Tika JAR file(s).
 
     Args:
@@ -49,23 +47,37 @@ def get_jars(tika_version: str) -> list[Path]:
     tikara_path = Path(str(files("tikara")))
     packages: list[str] = ["app"]
 
-    return [Path(tikara_path, f"jars/tika-{package}-{tika_version}.jar") for package in packages]
+    return [Path(tikara_path, f"jars/tika-{package}-{TIKA_VERSION}.jar") for package in packages]
 
 
-def initialize_jvm() -> None:
+def initialize_jvm(tika_jar_override: Path | None = None, extra_jars: list[Path] | None = None) -> None:
     """
     Tries to start the JVM with the Tika JAR file(s) in the classpath.
     If the JVM is already started, checks if the Tika JAR file(s) are in the classpath.
     """
     custom_jvm_args = os.environ.get("TIKA_JVM_ARGS", "")
 
+    classpath: list[Path] = get_jars()
+    if tika_jar_override:
+        if not tika_jar_override.exists():
+            msg = f"Custom Tika JAR file not found at: {tika_jar_override}"
+            raise FileNotFoundError(msg)
+        classpath = [tika_jar_override]
+    if extra_jars:
+        for jar in extra_jars:
+            if not jar.exists():
+                msg = f"Extra JAR file not found at: {jar}"
+                raise FileNotFoundError(msg)
+            classpath.append(jar)
+
     if not jpype.isJVMStarted():
-        jpype.startJVM(custom_jvm_args, classpath=get_jars(tika_version=TIKA_VERSION))
+        jpype.startJVM(custom_jvm_args, classpath=classpath)
         return
 
-    classpath: str = str(jpype.java.lang.System.getProperty("java.class.path"))
-    if "tika" not in classpath.casefold():
-        msg = "JVM was already started, but Tika JAR file(s) were not found in the classpath."
+    existing_classpath = str(jpype.java.lang.System.getProperty("java.class.path"))
+
+    if "tika" not in existing_classpath.casefold():
+        msg = "JVM was already started, but Tika JAR file was not found in the classpath."
         raise RuntimeError(msg)
 
 
@@ -77,7 +89,7 @@ class _JavaReaderWrapper(BinaryIO):
 
     def __init__(self, java_reader: "Reader", buffer_size: int = 8192) -> None:
         super().__init__()
-        from java.io import BufferedReader  # type: ignore  # noqa: PGH003
+        from java.io import BufferedReader
 
         if not isinstance(java_reader, BufferedReader):
             java_reader = BufferedReader(java_reader)
@@ -196,7 +208,7 @@ class _JavaReaderWrapper(BinaryIO):
 
 
 def wrap_python_stream(python_stream: BinaryIO) -> "PipedInputStream":
-    from java.io import PipedInputStream, PipedOutputStream  # type: ignore  # noqa: PGH003
+    from java.io import PipedInputStream, PipedOutputStream
 
     input_stream = PipedInputStream(8192)
     output_stream = PipedOutputStream(input_stream)
@@ -217,13 +229,13 @@ def read_to_string(source: "Reader | ByteArrayOutputStream") -> str:
     Args:
         source: Either a Java Reader or ByteArrayOutputStream
     """
-    from java.io import ByteArrayOutputStream  # type: ignore  # noqa: PGH003
+    from java.io import ByteArrayOutputStream
 
     if isinstance(source, ByteArrayOutputStream):
         return str(JString(source.toString("UTF-8")))
 
     # Existing Reader logic
-    from java.lang import String  # type: ignore  # noqa: PGH003
+    from java.lang import String
 
     char_buffer = jpype.JArray(jpype.JChar)(8192)  # type: ignore  # noqa: PGH003
     result = []
@@ -247,7 +259,7 @@ def stream_to_file(source: "Reader | ByteArrayOutputStream", output_file: Path) 
     Returns:
         Path: The path to the output file.
     """
-    from java.io import ByteArrayOutputStream  # type: ignore  # noqa: PGH003
+    from java.io import ByteArrayOutputStream
 
     if not output_file.parent.exists():
         output_file.parent.mkdir(parents=True)
@@ -258,7 +270,7 @@ def stream_to_file(source: "Reader | ByteArrayOutputStream", output_file: Path) 
             return output_file
 
         # Existing Reader logic
-        from java.lang import String  # type: ignore  # noqa: PGH003
+        from java.lang import String
 
         while True:
             char_buffer = jpype.JArray(jpype.JChar)(8192)  # type: ignore  # noqa: PGH003
@@ -279,7 +291,7 @@ def input_stream_as_binary_stream(java_input_stream: "InputStream") -> BinaryIO:
     Returns:
         BinaryIO: The Python binary stream that reads from the Java InputStream.
     """
-    from java.io import InputStreamReader  # type: ignore  # noqa: PGH003
+    from java.io import InputStreamReader
 
     reader = InputStreamReader(java_input_stream)
     return _JavaReaderWrapper(reader)
@@ -294,7 +306,7 @@ def reader_as_binary_stream(source: "Reader | ByteArrayOutputStream") -> BinaryI
     Returns:
         BinaryIO: The Python binary stream that reads from the source.
     """
-    from java.io import ByteArrayOutputStream  # type: ignore  # noqa: PGH003
+    from java.io import ByteArrayOutputStream
 
     if isinstance(source, ByteArrayOutputStream):
         return _JavaReaderWrapper(output_stream_to_reader(source))
@@ -314,7 +326,7 @@ def output_stream_to_reader(java_output_stream: "ByteArrayOutputStream") -> "Rea
     Returns:
         Reader: A Java Reader that can read the output stream's contents
     """
-    from java.io import ByteArrayInputStream, InputStreamReader  # type: ignore  # noqa: PGH003
+    from java.io import ByteArrayInputStream, InputStreamReader
 
     input_stream = ByteArrayInputStream(java_output_stream.toByteArray())  # type: ignore  # noqa: PGH003
     return InputStreamReader(input_stream)
@@ -331,7 +343,7 @@ def file_output_stream(file_path: Path | str, *, append: bool = False) -> Genera
     Yields:
         FileOutputStream: The wrapped file output stream.
     """
-    from java.io import FileOutputStream  # type: ignore  # noqa: PGH003
+    from java.io import FileOutputStream
 
     if isinstance(file_path, str):
         file_path = Path(file_path)
