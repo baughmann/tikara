@@ -7,7 +7,7 @@ import requests
 from testcontainers.core.container import DockerContainer
 
 from test.util import extract_and_cleanup_zip
-from tikara.tika import Tika
+from tikara.core import Tika
 
 UNPACK_RECURSIVE_TEST_CASES: list[tuple[str, list[str], int]] = [
     ("test_recursive_embedded_docx", ["embed1.zip", "image1.emf"], 1),

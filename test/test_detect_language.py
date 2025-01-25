@@ -2,7 +2,7 @@ import pytest
 import requests
 from testcontainers.core.container import DockerContainer
 
-from tikara.tika import LanguageConfidence, Tika
+from tikara.core import LanguageConfidence, Tika
 
 TEST_TEXTS: list[tuple[str, str, LanguageConfidence, float]] = [
     ("en", "The quick brown fox jumps over the lazy dog", LanguageConfidence.HIGH, 0.9),

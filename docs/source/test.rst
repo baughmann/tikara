@@ -31,7 +31,7 @@ test.test\_detect\_mime\_type module
 test.test\_java\_util module
 ----------------------------
 
-.. automodule:: test.test_java_util
+.. automodule:: test.test_util.java
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,7 +47,7 @@ test.test\_parse module
 test.test\_tika\_util module
 ----------------------------
 
-.. automodule:: test.test_tika_util
+.. automodule:: test.test_util.tika
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,14 +1,13 @@
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, cast
+from typing import TYPE_CHECKING, BinaryIO, cast
 from unittest.mock import Mock
 
 import pytest
-from typing import TYPE_CHECKING
 
-from tikara.tika_util import (
+from tikara.util.tika import (
     LanguageConfidence,
-    TikaraEmbeddedDocumentExtractor,
+    RecursiveEmbeddedDocumentExtractor,
     TikaraUnpackedItem,
     metadata_to_dict,
     tika_input_stream,
@@ -90,18 +89,18 @@ def test_tika_input_stream_invalid_input() -> None:
         pass
 
 
-class TesttikaraEmbeddedDocumentExtractor:
+class TestRecursiveEmbeddedDocumentExtractor:
     @pytest.fixture
-    def extractor(self, temp_dir: Path) -> TikaraEmbeddedDocumentExtractor:
+    def extractor(self, temp_dir: Path) -> RecursiveEmbeddedDocumentExtractor:
         from org.apache.tika.parser import ParseContext, Parser  # type: ignore  # noqa: PGH003
 
         parse_context = ParseContext()
         parser = cast(Parser, Mock())  # You'll need to properly mock this
-        return TikaraEmbeddedDocumentExtractor(
+        return RecursiveEmbeddedDocumentExtractor.create(
             parse_context=parse_context, parser=parser, output_dir=temp_dir, max_depth=3
         )
 
-    def test_parse_embedded_basic(self, extractor: TikaraEmbeddedDocumentExtractor, temp_dir: Path) -> None:
+    def test_parse_embedded_basic(self, extractor: RecursiveEmbeddedDocumentExtractor, temp_dir: Path) -> None:
         from java.io import ByteArrayInputStream  # type: ignore # noqa: PGH003
         from org.apache.tika.metadata import Metadata, TikaCoreProperties  # type: ignore  # noqa: PGH003
         from org.xml.sax import ContentHandler  # type: ignore # noqa: PGH003
@@ -120,12 +119,12 @@ class TesttikaraEmbeddedDocumentExtractor:
         assert results[0].file_path.exists()
         assert results[0].file_path.read_bytes() == b"test content"
 
-    def test_parse_embedded_max_depth(self, extractor: TikaraEmbeddedDocumentExtractor) -> None:
+    def test_parse_embedded_max_depth(self, extractor: RecursiveEmbeddedDocumentExtractor) -> None:
         from java.io import ByteArrayInputStream  # type: ignore # noqa: PGH003
         from org.apache.tika.metadata import Metadata  # type: ignore  # noqa: PGH003
         from org.xml.sax import ContentHandler  # type: ignore # noqa: PGH003
 
-        extractor.current_depth = extractor.max_depth
+        extractor._current_depth = extractor.max_depth
         metadata = Metadata()
         test_stream = ByteArrayInputStream(b"test")
         handler = cast(ContentHandler, Mock())
@@ -133,7 +132,7 @@ class TesttikaraEmbeddedDocumentExtractor:
         result = extractor.parseEmbedded(test_stream, handler, metadata, recurse=True)
         assert result is False
 
-    def test_should_parse_embedded(self, extractor: TikaraEmbeddedDocumentExtractor) -> None:
+    def test_should_parse_embedded(self, extractor: RecursiveEmbeddedDocumentExtractor) -> None:
         from org.apache.tika.metadata import Metadata  # type: ignore  # noqa: PGH003
 
         metadata = Metadata()

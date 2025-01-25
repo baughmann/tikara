@@ -7,7 +7,8 @@ import jpype
 import pytest
 from jpype import JString
 
-from tikara.java_util import (
+from tikara.core import Tika
+from tikara.util.java import (
     TIKA_VERSION,
     _JavaReaderWrapper,
     file_output_stream,
@@ -16,7 +17,6 @@ from tikara.java_util import (
     stream_to_file,
     wrap_python_stream,
 )
-from tikara.tika import Tika
 
 
 def test_jvm_classpath() -> None:
@@ -27,7 +27,7 @@ def test_jvm_classpath() -> None:
 
 class TestJavaReaderWrapper:
     def test_read_all_at_once(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, World!"
         reader = StringReader(test_data)
@@ -37,7 +37,7 @@ class TestJavaReaderWrapper:
         assert result.decode("utf-8") == test_data
 
     def test_read_in_chunks(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, World!"
         reader = StringReader(test_data)
@@ -50,7 +50,7 @@ class TestJavaReaderWrapper:
         assert "".join(chunks) == test_data
 
     def test_read_empty(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         reader = StringReader("")
         stream = _JavaReaderWrapper(reader)
@@ -59,7 +59,7 @@ class TestJavaReaderWrapper:
         assert result == b""
 
     def test_read_unicode(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, 世界!"
         reader = StringReader(test_data)
@@ -69,7 +69,7 @@ class TestJavaReaderWrapper:
         assert result.decode("utf-8") == test_data
 
     def test_read_zero_bytes(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         stream = _JavaReaderWrapper(StringReader("Hello, World!"))
 
@@ -77,7 +77,7 @@ class TestJavaReaderWrapper:
         assert result == b""
 
     def test_multiple_reads(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         reader = StringReader("Hello, World!")
         stream = _JavaReaderWrapper(reader)
@@ -91,7 +91,7 @@ class TestJavaReaderWrapper:
         assert third.decode("utf-8") == "ld!"
 
     def test_large_data(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "x" * 100000
         reader = StringReader(test_data)
@@ -101,7 +101,7 @@ class TestJavaReaderWrapper:
         assert result.decode("utf-8") == test_data
 
     def test_read_past_eof(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         reader = StringReader("Hello")
         stream = _JavaReaderWrapper(reader)
@@ -111,7 +111,7 @@ class TestJavaReaderWrapper:
         assert result == b""
 
     def test_small_buffer_size(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         reader = StringReader("Hello, World!")
         stream = _JavaReaderWrapper(reader, buffer_size=3)
@@ -120,7 +120,7 @@ class TestJavaReaderWrapper:
         assert result.decode("utf-8") == "Hello, World!"
 
     def test_reader_close(self) -> None:
-        from java.io import IOException, StringReader  # type: ignore  # noqa: PGH003
+        from java.io import IOException, StringReader
 
         reader = StringReader("Hello")
         stream = _JavaReaderWrapper(reader)
@@ -132,7 +132,7 @@ class TestJavaReaderWrapper:
             reader.read()
 
     def test_contextmanager_close(self) -> None:
-        from java.io import IOException, StringReader  # type: ignore  # noqa: PGH003
+        from java.io import IOException, StringReader
 
         with _JavaReaderWrapper(StringReader("Hello")) as r:
             pass
@@ -142,7 +142,7 @@ class TestJavaReaderWrapper:
             r.read()
 
     def test_readline(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Line 1\nLine 2\nLine 3"
         reader = StringReader(test_data)
@@ -161,7 +161,7 @@ class TestJavaReaderWrapper:
         assert result == b""
 
     def test_readlines(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Line 1\nLine 2\nLine 3"
         reader = StringReader(test_data)
@@ -174,19 +174,19 @@ class TestJavaReaderWrapper:
 class TestReadToString:
     def test_read_to_string_basic(self) -> None:
         test_data = "Hello, World!"
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         result = read_to_string(StringReader(test_data))
         assert result == test_data
 
     def test_read_to_string_empty(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         result = read_to_string(StringReader(""))
         assert result == ""
 
     def test_read_to_string_unicode(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, 世界! 🌍"
 
@@ -194,7 +194,7 @@ class TestReadToString:
         assert result == test_data
 
     def test_read_to_string_large_data(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "x" * 100000
 
@@ -202,7 +202,7 @@ class TestReadToString:
         assert result == test_data
 
     def test_read_to_string_multiline(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Line 1\nLine 2\nLine 3"
 
@@ -212,7 +212,7 @@ class TestReadToString:
 
 class TestStreamToFile:
     def test_stream_to_file_basic(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, World!"
 
@@ -225,7 +225,7 @@ class TestStreamToFile:
             assert output_path.read_text() == test_data
 
     def test_stream_to_file_empty(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "empty.txt"
@@ -236,7 +236,7 @@ class TestStreamToFile:
             assert output_path.read_text() == ""
 
     def test_stream_to_file_unicode(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, 世界! 🌍"
 
@@ -249,7 +249,7 @@ class TestStreamToFile:
             assert output_path.read_text() == test_data
 
     def test_stream_to_file_large_data(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "x" * 100000
 
@@ -262,7 +262,7 @@ class TestStreamToFile:
             assert output_path.read_text() == test_data
 
     def test_stream_to_file_overwrites_existing(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         initial_data = "Initial content"
         test_data = "New content"
@@ -278,7 +278,7 @@ class TestStreamToFile:
             assert output_path.read_text() == test_data
 
     def test_stream_to_file_invalid_path(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         invalid_path = Path("/nonexistent/directory/file.txt")
 
@@ -288,7 +288,7 @@ class TestStreamToFile:
 
 class TestPipeToStream:
     def test_pipe_to_basic(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, World!"
 
@@ -300,7 +300,7 @@ class TestPipeToStream:
         assert result.decode("utf-8") == test_data
 
     def test_pipe_to_read_chunks(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, World!"
 
@@ -313,7 +313,7 @@ class TestPipeToStream:
         assert "".join(chunks) == test_data
 
     def test_pipe_to_empty(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         r = reader_as_binary_stream(StringReader(""))
         result = r.read()
@@ -321,7 +321,7 @@ class TestPipeToStream:
         assert result == b""
 
     def test_pipe_to_unicode(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "Hello, 世界! 🌍"
 
@@ -331,7 +331,7 @@ class TestPipeToStream:
         assert result.decode("utf-8") == test_data
 
     def test_pipe_to_large_data(self) -> None:
-        from java.io import StringReader  # type: ignore  # noqa: PGH003
+        from java.io import StringReader
 
         test_data = "x" * 100000
 
@@ -341,7 +341,7 @@ class TestPipeToStream:
         assert result.decode("utf-8") == test_data
 
     def test_pipe_to_closed_reader(self) -> None:
-        from java.io import IOException, StringReader  # type: ignore  # noqa: PGH003
+        from java.io import IOException, StringReader
 
         r = reader_as_binary_stream(StringReader("Hello"))
 
@@ -353,7 +353,7 @@ class TestPipeToStream:
 
 class TestWrapPythonStream:
     def test_basic_streaming(self) -> None:
-        from java.io import PipedInputStream  # type: ignore  # noqa: PGH003
+        from java.io import PipedInputStream
 
         test_data = b"Hello, World!"
         bio = BytesIO(test_data)
@@ -401,7 +401,7 @@ class TestWrapPythonStream:
         assert bytes(result) == test_data
 
     def test_stream_closes_properly(self) -> None:
-        from java.io import IOException  # type: ignore  # noqa: PGH003
+        from java.io import IOException
 
         bio = BytesIO(b"test data")
         stream = wrap_python_stream(bio)
