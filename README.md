@@ -1,8 +1,8 @@
-<img src="resources/images/tikara_logo.svg" alt="Tikara Logo" style="width:100px;"/>
+<img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/resources/images/tikara_logo.svg" alt="Tikara Logo" style="width:100px;"/>
 
 # Tikara
 
-![Coverage](resources/images/coverage.svg) ![Tests](resources/images/tests.svg) ![PyPI](https://img.shields.io/pypi/v/tikara) ![PyPI - License](https://img.shields.io/pypi/l/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/chrismattmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/chrismattmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
+![Coverage](https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/resources/images/coverage.svg) ![Tests](https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/resources/images/tests.svg) ![PyPI](https://img.shields.io/pypi/v/tikara) ![PyPI - License](https://img.shields.io/pypi/l/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/baughmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/baughmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
 
 ## The digital babel fish _(now for Python)_
 
