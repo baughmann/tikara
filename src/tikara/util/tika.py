@@ -3,23 +3,17 @@
 import logging
 from collections.abc import Generator
 from contextlib import contextmanager
-from dataclasses import dataclass
-from enum import StrEnum, unique
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Protocol, Self
+from typing import TYPE_CHECKING, BinaryIO, Protocol, Self
 
 from jpype import JImplements, JOverride
 
+from tikara.data_types import TikaMetadata, TikaParseOutputFormat, TikaUnpackedItem
 from tikara.util.java import _file_output_stream, _is_binary_io, _wrap_python_stream, reader_as_binary_stream
-
-if TYPE_CHECKING:
-    pass
+from tikara.util.misc import _validate_input_file
 
 logger = logging.getLogger(__name__)
 
-
-TikaParseOutputFormat = Literal["txt", "xhtml"]
-TikaInputType = str | Path | bytes | BinaryIO
 
 if TYPE_CHECKING:
     from java.io import (
@@ -29,37 +23,6 @@ if TYPE_CHECKING:
     from org.apache.tika.metadata import Metadata
     from org.apache.tika.parser import ParseContext, Parser
     from org.xml.sax import ContentHandler
-
-
-@dataclass(frozen=True, kw_only=True)
-class TikaraUnpackedItem:
-    """Represents an unpacked embedded document."""
-
-    metadata: dict[str, str]
-    file_path: Path
-
-
-@unique
-class LanguageConfidence(StrEnum):
-    """Enum representing the confidence level of a detected language result."""
-
-    HIGH = "HIGH"
-    MEDIUM = "MEDIUM"
-    LOW = "LOW"
-    NONE = "NONE"
-
-
-@dataclass(frozen=True, kw_only=True)
-class TikaraDetectLanguageResult:
-    """Represents the result of a language detection operation."""
-
-    language: str
-    confidence: LanguageConfidence
-    raw_score: float
-
-
-def _metadata_to_dict(metadata: "Metadata") -> dict[str, str]:
-    return {str(key): str(metadata.get(key)) for key in metadata.names()}
 
 
 class _RecursiveEmbeddedDocumentExtractor(Protocol):
@@ -104,11 +67,11 @@ class _RecursiveEmbeddedDocumentExtractor(Protocol):
         """
         ...
 
-    def get_results(self) -> list[TikaraUnpackedItem]:
+    def get_results(self) -> list[TikaUnpackedItem]:
         """Return the list of unpacked embedded documents.
 
         Returns:
-            list[TikaraUnpackedItem]: The list of unpacked embedded documents.
+            list[TikaUnpackedItem]: The list of unpacked embedded documents.
         """
         ...
 
@@ -147,7 +110,7 @@ class _RecursiveEmbeddedDocumentExtractor(Protocol):
                 self._max_depth = max_depth
                 self._current_depth = 0
                 self._parser = parser
-                self._results: list[TikaraUnpackedItem] = []
+                self._results: list[TikaUnpackedItem] = []
                 self._context = parse_context
 
             @JOverride
@@ -177,9 +140,9 @@ class _RecursiveEmbeddedDocumentExtractor(Protocol):
                             fos.write(bytes_read)
 
                     self._results.append(
-                        TikaraUnpackedItem(
+                        TikaUnpackedItem(
                             file_path=output_path,
-                            metadata=_metadata_to_dict(metadata),
+                            metadata=TikaMetadata._metadata_to_dict(metadata),
                         )
                     )
 
@@ -200,7 +163,7 @@ class _RecursiveEmbeddedDocumentExtractor(Protocol):
             def shouldParseEmbedded(self, metadata: "Metadata") -> bool:  # noqa: N802
                 return True
 
-            def get_results(self) -> list[TikaraUnpackedItem]:
+            def get_results(self) -> list[TikaUnpackedItem]:
                 return self._results
 
         return RecursiveEmbeddedDocumentExtractorImpl(parse_context, parser, output_dir, max_depth)
@@ -252,7 +215,6 @@ def _tika_input_stream(
         TikaInputStream: The wrapped input stream.
     """
     from java.io import ByteArrayInputStream, Closeable, InputStream, PipedInputStream
-    from java.nio.file import NoSuchFileException  # type: ignore # noqa: PGH003
     from java.nio.file import Path as JPath
     from org.apache.tika.io import TemporaryResources, TikaInputStream
     from org.apache.tika.metadata import Metadata
@@ -261,6 +223,7 @@ def _tika_input_stream(
 
     input_obj: PipedInputStream | ByteArrayInputStream | InputStream | JPath
     if isinstance(obj, str | Path):
+        _validate_input_file(obj)
         input_obj = JPath.of(str(obj))  # technically supports network resources
     elif isinstance(obj, bytes):
         input_obj = ByteArrayInputStream(obj)
@@ -277,8 +240,6 @@ def _tika_input_stream(
             yield TikaInputStream.get(input_obj, TemporaryResources(), metadata)
         else:
             yield TikaInputStream.get(input_obj, metadata)
-    except NoSuchFileException as e:
-        raise FileNotFoundError(e.message()) from e
     finally:
         if isinstance(input_obj, Closeable):
             input_obj.close()
@@ -290,14 +251,14 @@ def _handle_file_output(
     input_stream: "InputStream",
     metadata: "Metadata",
     output_format: TikaParseOutputFormat,
-) -> tuple[Path, dict[str, Any]]:
+) -> tuple[Path, TikaMetadata]:
     """Handle parsing with file output."""
     from java.io import FileOutputStream, FileWriter
     from org.apache.tika.parser import (
         ParseContext,
         Parser,
     )
-    from org.apache.tika.sax import (  # type: ignore # noqa: PGH003
+    from org.apache.tika.sax import (
         BodyContentHandler,
         ToXMLContentHandler,
     )
@@ -321,7 +282,7 @@ def _handle_file_output(
 
         parser.parse(input_stream, ch, metadata, pc)
 
-        return output_file, _metadata_to_dict(metadata)
+        return output_file, TikaMetadata._from_java_metadata(metadata)
     finally:
         if output:
             output.close()
@@ -332,7 +293,7 @@ def _handle_stream_output(
     input_stream: "InputStream",
     metadata: "Metadata",
     output_format: TikaParseOutputFormat,
-) -> tuple[BinaryIO, dict[str, Any]]:
+) -> tuple[BinaryIO, TikaMetadata]:
     """Handle parsing with stream output."""
     from java.io import ByteArrayOutputStream, OutputStreamWriter
     from org.apache.tika.parser import (
@@ -360,7 +321,7 @@ def _handle_stream_output(
 
     parser.parse(input_stream, ch, metadata, pc)
 
-    return reader_as_binary_stream(output_stream), _metadata_to_dict(metadata)
+    return reader_as_binary_stream(output_stream), TikaMetadata._from_java_metadata(metadata)
 
 
 def _handle_string_output(
@@ -368,7 +329,7 @@ def _handle_string_output(
     input_stream: "InputStream",
     metadata: "Metadata",
     output_format: TikaParseOutputFormat,
-) -> tuple[str, dict[str, Any]]:
+) -> tuple[str, TikaMetadata]:
     """Handle parsing with string output."""
     from java.io import StringWriter
     from org.apache.tika.parser import (
@@ -394,4 +355,4 @@ def _handle_string_output(
 
     parser.parse(input_stream, ch, metadata, pc)
 
-    return str(ch.toString()), _metadata_to_dict(metadata)
+    return str(ch.toString()), TikaMetadata._from_java_metadata(metadata)

@@ -2,21 +2,25 @@
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, BinaryIO, Literal, overload
+from typing import TYPE_CHECKING, BinaryIO, Literal, overload
 
-from jpype import JProxy
+from jpype import JException, JProxy
 
+from tikara.data_types import (
+    TikaDetectLanguageResult,
+    TikaInputType,
+    TikaLanguageConfidence,
+    TikaMetadata,
+    TikaParseOutputFormat,
+)
 from tikara.util.java import (
     _is_binary_io,
     _wrap_python_stream,
     initialize_jvm,
 )
+from tikara.util.misc import _validate_and_prepare_output_file
 from tikara.util.tika import (
-    LanguageConfidence,
-    TikaInputType,
-    TikaParseOutputFormat,
-    TikaraDetectLanguageResult,
-    TikaraUnpackedItem,
+    TikaUnpackedItem,
     _get_metadata,
     _handle_file_output,
     _handle_stream_output,
@@ -238,7 +242,7 @@ class Tika:
     def detect_language(
         self,
         content: str,
-    ) -> TikaraDetectLanguageResult:
+    ) -> TikaDetectLanguageResult:
         """Detect the natural language of text content using Apache Tika's language detection.
 
         Uses statistical language detection models to identify the most likely language. Higher confidence
@@ -248,7 +252,7 @@ class Tika:
             content: Text content to analyze. Should be plain text, not markup/code.
 
         Returns:
-            TikaraDetectLanguageResult with fields:
+            TikaDetectLanguageResult with fields:
                 language: ISO 639-1 language code (e.g. "en" for English)
                 confidence: Qualitative confidence level (HIGH/MEDIUM/LOW/NONE)
                 raw_score: Numeric confidence score between 0 and 1
@@ -265,7 +269,7 @@ class Tika:
                 result.language
                 'en'
                 result.confidence
-                LanguageConfidence.HIGH
+                TikaLanguageConfidence.HIGH
                 result.raw_score
                 0.999
 
@@ -273,7 +277,7 @@ class Tika:
 
                 result = tika.detect_language("123")
                 result.confidence
-                LanguageConfidence.LOW
+                TikaLanguageConfidence.LOW
 
             Other languages::
 
@@ -293,9 +297,9 @@ class Tika:
 
         result = self._language_detector.detect(content)
 
-        return TikaraDetectLanguageResult(
+        return TikaDetectLanguageResult(
             language=str(result.getLanguage()),
-            confidence=LanguageConfidence(str(result.getConfidence().name())),
+            confidence=TikaLanguageConfidence(str(result.getConfidence().name())),
             raw_score=float(result.getRawScore()),
         )
 
@@ -307,7 +311,7 @@ class Tika:
         max_depth: int = 1,
         input_file_name: str | Path | None = None,
         content_type: str | None = None,
-    ) -> list[TikaraUnpackedItem]:
+    ) -> list[TikaUnpackedItem]:
         """Extract embedded documents from a container document recursively.
 
         Extracts and saves embedded documents (e.g. images in PDFs, files in Office documents) to disk.
@@ -326,7 +330,7 @@ class Tika:
             content_type: MIME type of input if known. Helps with metadata extraction.
 
         Returns:
-            List[TikaraUnpackedItem], each containing:
+            List[TikaUnpackedItem], each containing:
                 file_path: Path where extracted doc was saved
                 metadata: Dict of metadata about extracted doc
 
@@ -348,9 +352,9 @@ class Tika:
             Recursive extraction::
 
                 tika.unpack("container.docx", Path("out/"), max_depth=3)
-                [TikaraUnpackedItem(file_path='out/image1.emf', metadata={...}),
-                TikaraUnpackedItem(file_path='out/report.pdf', metadata={...}),
-                TikaraUnpackedItem(file_path='out/report/chart.png', metadata={...})]
+                [TikaUnpackedItem(file_path='out/image1.emf', metadata={...}),
+                TikaUnpackedItem(file_path='out/report.pdf', metadata={...}),
+                TikaUnpackedItem(file_path='out/report/chart.png', metadata={...})]
 
         Notes:
             - Creates output_dir if it doesn't exist
@@ -368,6 +372,7 @@ class Tika:
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
+        from java.nio.file import NoSuchFileException, NotDirectoryException
         from org.apache.tika.extractor import EmbeddedDocumentExtractor
         from org.apache.tika.parser import ParseContext, Parser
         from org.xml.sax import ContentHandler
@@ -394,10 +399,16 @@ class Tika:
             ),
         )
 
-        with _tika_input_stream(obj, metadata=metadata) as input_stream:
-            self._parser.parse(input_stream, ch, metadata, pc)
+        try:
+            with _tika_input_stream(obj, metadata=metadata) as input_stream:
+                self._parser.parse(input_stream, ch, metadata, pc)
 
-            return extractor.get_results()
+                return extractor.get_results()
+        except JException as e:
+            if isinstance(e, NoSuchFileException | NotDirectoryException):
+                raise FileNotFoundError(e.getMessage()) from e
+
+            raise
 
     @overload
     def parse(
@@ -407,7 +418,7 @@ class Tika:
         output_format: TikaParseOutputFormat = "xhtml",
         input_file_name: str | Path | None = None,
         content_type: str | None = None,
-    ) -> tuple[str, dict[str, Any]]:
+    ) -> tuple[str, TikaMetadata]:
         """Extract content and metadata from a document, returning as a string.
 
         Default parsing mode that returns content as a string. Best for normal use cases
@@ -439,7 +450,7 @@ class Tika:
         output_format: TikaParseOutputFormat = "xhtml",
         input_file_name: str | Path | None = None,
         content_type: str | None = None,
-    ) -> tuple[Path, dict[str, Any]]:
+    ) -> tuple[Path, TikaMetadata]:
         """Extract content and metadata from a document, saving content to a file.
 
         Saves extracted content to specified file path instead of returning as string.
@@ -472,7 +483,7 @@ class Tika:
         output_format: TikaParseOutputFormat = "xhtml",
         input_file_name: str | Path | None = None,
         content_type: str | None = None,
-    ) -> tuple[BinaryIO, dict[str, Any]]:
+    ) -> tuple[BinaryIO, TikaMetadata]:
         """Extract content and metadata from a document, returning content as a stream.
 
         Returns content as a binary stream for efficient processing of large documents.
@@ -497,22 +508,6 @@ class Tika:
         """
         ...
 
-    def _validate_and_prepare_output_file(
-        self,
-        output_file: Path | str | None,
-        output_format: TikaParseOutputFormat,
-    ) -> Path | None:
-        if output_file:
-            if isinstance(output_file, str):
-                output_file = Path(output_file)
-            if not output_file.parent.exists():
-                output_file.parent.mkdir(parents=True)
-            if output_file.suffix:
-                output_file = output_file.with_suffix(f".{output_format}")
-            return output_file
-
-        return None
-
     def parse(  # noqa: PLR0913
         self,
         obj: TikaInputType,
@@ -522,7 +517,7 @@ class Tika:
         output_file: Path | str | None = None,
         input_file_name: str | Path | None = None,
         content_type: str | None = None,
-    ) -> tuple[str | Path | BinaryIO, dict[str, Any]]:
+    ) -> tuple[str | Path | BinaryIO, TikaMetadata]:
         """Extract text content and metadata from documents.
 
         Uses Apache Tika's parsing capabilities to extract plain text or structured content
@@ -608,7 +603,7 @@ class Tika:
         else:
             output_mode = "string"
 
-        output_file = self._validate_and_prepare_output_file(output_file=output_file, output_format=output_format)
+        output_file = _validate_and_prepare_output_file(output_file=output_file, output_format=output_format)
         if output_mode == "file" and not output_file:
             msg = "output_file is required when mode is 'file'"
             raise ValueError(msg)

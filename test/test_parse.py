@@ -8,7 +8,9 @@ import requests
 from jpype import JImplements, JOverride, JString
 from testcontainers.core.container import DockerContainer
 
+from test.conftest import ALL_INVALID_DOCS, ALL_VALID_DOCS
 from tikara import Tika
+from tikara.data_types import TikaMetadata
 
 if TYPE_CHECKING:
     from org.apache.tika.detect import Detector
@@ -44,7 +46,7 @@ def test_parse_to_string_input_types(
     content, metadata = tika.parse(input_obj)
     assert content
     assert metadata
-    assert metadata["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    assert metadata.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
 @pytest.mark.parametrize("output_format", ["txt", "xhtml"])
@@ -76,7 +78,7 @@ def test_parse_to_file_combinations(
 
     assert file_path
     assert file_path.exists()
-    assert metadata["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    assert metadata.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     with open(file_path) as f:
         content = f.read()
         assert content
@@ -113,7 +115,8 @@ def test_parse_to_stream_with_content_type(
     )
 
     assert stream
-    assert metadata["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    assert metadata
+    assert metadata.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     content = stream.read().decode()
     assert content
 
@@ -153,7 +156,8 @@ def test_parse_different_file_types(
     test_file: Path = request.getfixturevalue(fixture_name)
     content, metadata = tika.parse(test_file)
     assert content
-    assert expected_content_type in metadata["Content-Type"]
+    assert metadata.content_type
+    assert expected_content_type in metadata.content_type
 
 
 @pytest.fixture
@@ -224,7 +228,7 @@ def test_parse_metadata_compare_with_tika_server(
     if expected_missing:
         pytest.warns(UserWarning, match=f"{len(expected_missing)} metadata keys are expected to be missing")
 
-    our_metadata: dict[str, str] | None = None
+    our_metadata: TikaMetadata | None = None
     match input_type:
         case "string":
             _, our_metadata = tika.parse(test_file, input_file_name=test_file.name)
@@ -246,11 +250,15 @@ def test_parse_metadata_compare_with_tika_server(
     # drop the content key from the response
     tika_server_metadata.pop("X-TIKA:content")
 
-    ours_has_but_not_tika = set(our_metadata.keys()) - set(tika_server_metadata.keys())
-    tika_has_but_not_ours = set(tika_server_metadata.keys()) - set(our_metadata.keys()) - set(expected_missing)
+    ours_has_but_not_tika = set(our_metadata.raw_metadata.keys()) - set(tika_server_metadata.keys())
+    tika_has_but_not_ours = (
+        set(tika_server_metadata.keys()) - set(our_metadata.raw_metadata.keys()) - set(expected_missing)
+    )
 
     if ours_has_but_not_tika:
-        ours_friendly: dict[str, str] = {k: str(v) for k, v in our_metadata.items() if k in ours_has_but_not_tika}
+        ours_friendly: dict[str, str] = {
+            k: str(v) for k, v in our_metadata.raw_metadata.items() if k in ours_has_but_not_tika
+        }
         pytest.fail(f"Ours has but Tika server does not: {ours_friendly}")
 
     if tika_has_but_not_ours:
@@ -259,7 +267,7 @@ def test_parse_metadata_compare_with_tika_server(
         }
         pytest.fail(f"Tika server has but ours does not: {tika_friendly}")
 
-    for key, value in our_metadata.items():
+    for key, value in our_metadata.raw_metadata.items():
         if key in expected_missing:
             continue
         assert value in tika_server_metadata[key], (
@@ -424,5 +432,21 @@ def test_parse_custom_parser_and_detector(
     content, metadata = tika.parse(test_file)
     assert content
     assert metadata
-    assert expected_mime_type in metadata["Content-Type"]
-    assert expected_parser_name_pattern in metadata["X-TIKA:Parsed-By"]
+    assert metadata.content_type
+    assert expected_mime_type in metadata.content_type
+    assert expected_parser_name_pattern in metadata.raw_metadata["X-TIKA:Parsed-By"]
+
+
+@pytest.mark.parametrize("input_file_path", ALL_VALID_DOCS)
+def test_parse_all_valid_docs_no_errors(tika: Tika, input_file_path: Path) -> None:
+    content, metadata = tika.parse(input_file_path)
+    assert content
+    assert metadata
+    assert metadata.content_type
+    assert metadata.raw_metadata
+
+
+@pytest.mark.parametrize("input_file_path", ALL_INVALID_DOCS)
+def test_parse_all_invalid_docs_no_errors(tika: Tika, input_file_path: Path) -> None:
+    with pytest.raises(Exception):  # noqa: B017, PT011
+        tika.parse(input_file_path)

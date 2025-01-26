@@ -1,19 +1,21 @@
 """Main package entrypoint for Tikara."""
 
 from tikara.core import Tika
-from tikara.util.tika import (
-    LanguageConfidence,
+from tikara.data_types import (
+    TikaDetectLanguageResult,
     TikaInputType,
+    TikaLanguageConfidence,
+    TikaMetadata,
     TikaParseOutputFormat,
-    TikaraDetectLanguageResult,
-    TikaraUnpackedItem,
+    TikaUnpackedItem,
 )
 
 __all__ = [
-    "LanguageConfidence",
     "Tika",
+    "TikaDetectLanguageResult",
     "TikaInputType",
+    "TikaLanguageConfidence",
+    "TikaMetadata",
     "TikaParseOutputFormat",
-    "TikaraDetectLanguageResult",
-    "TikaraUnpackedItem",
+    "TikaUnpackedItem",
 ]
