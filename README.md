@@ -30,11 +30,9 @@ content, metadata = tika.parse("document.pdf")
 
 🌈 **1682 supported media types and counting!**
 
-[🔍 See the full list →](
-[Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/SUPPORTED_MIME_TYPES.md) 📔
-)
+[🔍 See the full list →](https://github.com/baughmann/tikara/tree/master/SUPPORTED_MIME_TYPES.md)
 
-## 🛠 Installation
+## 🛠️ Installation
 
 ```bash
 pip install tikara
