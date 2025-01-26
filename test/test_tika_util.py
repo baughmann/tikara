@@ -7,10 +7,10 @@ import pytest
 
 from tikara.util.tika import (
     LanguageConfidence,
-    RecursiveEmbeddedDocumentExtractor,
     TikaraUnpackedItem,
-    metadata_to_dict,
-    tika_input_stream,
+    _metadata_to_dict,
+    _RecursiveEmbeddedDocumentExtractor,
+    _tika_input_stream,
 )
 
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ def sample_metadata() -> "Metadata":
 
 
 def test_metadata_to_dict(sample_metadata: "Metadata") -> None:
-    result = metadata_to_dict(sample_metadata)
+    result = _metadata_to_dict(sample_metadata)
     assert result == {"key1": "value1", "key2": "value2"}
 
 
@@ -58,7 +58,7 @@ def test_tika_input_stream_with_path(temp_dir: Path) -> None:
     test_file = temp_dir / "test.txt"
     test_file.write_text("test content")
 
-    with tika_input_stream(test_file) as tis:
+    with _tika_input_stream(test_file) as tis:
         content = []
         while (byte := tis.read()) != -1:
             content.append(byte)
@@ -68,7 +68,7 @@ def test_tika_input_stream_with_path(temp_dir: Path) -> None:
 
 def test_tika_input_stream_with_bytes() -> None:
     test_bytes = b"test content"
-    with tika_input_stream(test_bytes) as tis:
+    with _tika_input_stream(test_bytes) as tis:
         content = []
         while (byte := tis.read()) != -1:
             content.append(byte)
@@ -77,7 +77,7 @@ def test_tika_input_stream_with_bytes() -> None:
 
 def test_tika_input_stream_with_binary_io() -> None:
     bio: BinaryIO = BytesIO(b"test content")
-    with tika_input_stream(bio) as tis:
+    with _tika_input_stream(bio) as tis:
         content = []
         while (byte := tis.read()) != -1:
             content.append(byte)
@@ -85,22 +85,22 @@ def test_tika_input_stream_with_binary_io() -> None:
 
 
 def test_tika_input_stream_invalid_input() -> None:
-    with pytest.raises(TypeError), tika_input_stream(123):  # type: ignore  # noqa: PGH003
+    with pytest.raises(TypeError), _tika_input_stream(123):  # type: ignore  # noqa: PGH003
         pass
 
 
 class TestRecursiveEmbeddedDocumentExtractor:
     @pytest.fixture
-    def extractor(self, temp_dir: Path) -> RecursiveEmbeddedDocumentExtractor:
+    def extractor(self, temp_dir: Path) -> _RecursiveEmbeddedDocumentExtractor:
         from org.apache.tika.parser import ParseContext, Parser  # type: ignore  # noqa: PGH003
 
         parse_context = ParseContext()
         parser = cast(Parser, Mock())  # You'll need to properly mock this
-        return RecursiveEmbeddedDocumentExtractor.create(
+        return _RecursiveEmbeddedDocumentExtractor.create(
             parse_context=parse_context, parser=parser, output_dir=temp_dir, max_depth=3
         )
 
-    def test_parse_embedded_basic(self, extractor: RecursiveEmbeddedDocumentExtractor, temp_dir: Path) -> None:
+    def test_parse_embedded_basic(self, extractor: _RecursiveEmbeddedDocumentExtractor, temp_dir: Path) -> None:
         from java.io import ByteArrayInputStream  # type: ignore # noqa: PGH003
         from org.apache.tika.metadata import Metadata, TikaCoreProperties  # type: ignore  # noqa: PGH003
         from org.xml.sax import ContentHandler  # type: ignore # noqa: PGH003
@@ -119,12 +119,12 @@ class TestRecursiveEmbeddedDocumentExtractor:
         assert results[0].file_path.exists()
         assert results[0].file_path.read_bytes() == b"test content"
 
-    def test_parse_embedded_max_depth(self, extractor: RecursiveEmbeddedDocumentExtractor) -> None:
+    def test_parse_embedded_max_depth(self, extractor: _RecursiveEmbeddedDocumentExtractor) -> None:
         from java.io import ByteArrayInputStream  # type: ignore # noqa: PGH003
         from org.apache.tika.metadata import Metadata  # type: ignore  # noqa: PGH003
         from org.xml.sax import ContentHandler  # type: ignore # noqa: PGH003
 
-        extractor._current_depth = extractor.max_depth
+        extractor._current_depth = extractor._max_depth
         metadata = Metadata()
         test_stream = ByteArrayInputStream(b"test")
         handler = cast(ContentHandler, Mock())
@@ -132,7 +132,7 @@ class TestRecursiveEmbeddedDocumentExtractor:
         result = extractor.parseEmbedded(test_stream, handler, metadata, recurse=True)
         assert result is False
 
-    def test_should_parse_embedded(self, extractor: RecursiveEmbeddedDocumentExtractor) -> None:
+    def test_should_parse_embedded(self, extractor: _RecursiveEmbeddedDocumentExtractor) -> None:
         from org.apache.tika.metadata import Metadata  # type: ignore  # noqa: PGH003
 
         metadata = Metadata()

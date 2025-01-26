@@ -1,3 +1,5 @@
+"""Miscellaneous utility functions."""
+
 from pathlib import Path
 
 from tikara.util.tika import TikaParseOutputFormat

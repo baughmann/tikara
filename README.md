@@ -30,7 +30,9 @@ content, metadata = tika.parse("document.pdf")
 
 🌈 **1682 supported media types and counting!**
 
-[🔍 See the full list →](/SUPPORTED_MIME_TYPES.md)
+[🔍 See the full list →](
+[Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/SUPPORTED_MIME_TYPES.md) 📔
+)
 
 ## 🛠 Installation
 
@@ -187,7 +189,7 @@ For detailed documentation on:
 - Custom JAR integration
 - Performance optimization
 
-See [ADVANCED.md](ADVANCED.md)
+See the [Example Jupyter Notebooks](https://github.com/baughmann/tikara/tree/master/examples) 📔
 
 ## 🎯 Inspiration
 
@@ -270,4 +272,4 @@ See [API Documentation](https://tikara.readthedocs.io/) for complete details.
 
 ## 📄 License
 
-Apache License 2.0 - See [LICENSE](LICENSE) for details.
+Apache License 2.0 - See [LICENSE](https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/LICENSE.txt) for details.

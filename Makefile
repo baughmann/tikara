@@ -13,11 +13,13 @@ test_coverage:
 	@uv run python -m pytest --junitxml=junit.xml  --cov-report term --cov-report xml:coverage.xml --cov=tikara
 
 safety:
-	@uv run safety scan --save-as html safety_scan.html
+	@uv run safety scan --save-as 
 
 docs:
-	@uv run sphinx-apidoc -f -o docs/source/ .
+	@uv run pydocstyle src
+	@uv run sphinx-apidoc -f -o docs/source/ . "test*"
 	@uv run sphinx-build -b html docs/source/ docs/build/html
+
 
 prepush: ruff test test_coverage safety
 

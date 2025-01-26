@@ -1,3 +1,5 @@
+"""Main package entrypoint for Tikara."""
+
 from tikara.core import Tika
 from tikara.util.tika import (
     LanguageConfidence,

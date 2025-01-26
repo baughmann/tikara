@@ -1,15 +1,16 @@
+"""Collection of utility function and classes for interacting with the underlying Apache Tika library."""
+
 import logging
-from abc import abstractmethod
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum, unique
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Protocol, Self, override
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Protocol, Self
 
 from jpype import JImplements, JOverride
 
-from tikara.util.java import file_output_stream, is_binary_io, reader_as_binary_stream, wrap_python_stream
+from tikara.util.java import _file_output_stream, _is_binary_io, _wrap_python_stream, reader_as_binary_stream
 
 if TYPE_CHECKING:
     pass
@@ -32,12 +33,16 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, kw_only=True)
 class TikaraUnpackedItem:
+    """Represents an unpacked embedded document."""
+
     metadata: dict[str, str]
     file_path: Path
 
 
 @unique
 class LanguageConfidence(StrEnum):
+    """Enum representing the confidence level of a detected language result."""
+
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
@@ -46,18 +51,21 @@ class LanguageConfidence(StrEnum):
 
 @dataclass(frozen=True, kw_only=True)
 class TikaraDetectLanguageResult:
+    """Represents the result of a language detection operation."""
+
     language: str
     confidence: LanguageConfidence
     raw_score: float
 
 
-def metadata_to_dict(metadata: "Metadata") -> dict[str, str]:
+def _metadata_to_dict(metadata: "Metadata") -> dict[str, str]:
     return {str(key): str(metadata.get(key)) for key in metadata.names()}
 
 
-class RecursiveEmbeddedDocumentExtractor(Protocol):
+class _RecursiveEmbeddedDocumentExtractor(Protocol):
     """
     Extracts embedded documents from a parent document using Apache Tika.
+
     Writes the extracted documents to the specified output directory and keeps track of the metadata and file
     paths extracted.
     """
@@ -71,43 +79,63 @@ class RecursiveEmbeddedDocumentExtractor(Protocol):
         handler: "ContentHandler",
         metadata: "Metadata",
         recurse: bool,  # noqa: FBT001
-    ) -> bool: ...
+    ) -> bool:
+        """Parse an embedded document.
 
-    def shouldParseEmbedded(self, metadata: "Metadata") -> bool: ...  # noqa: N802
+        Args:
+            stream (InputStream): The Java input stream of the embedded document.
+            handler (ContentHandler): The content handler to use for parsing.
+            metadata (Metadata): The metadata of the embedded document.
+            recurse (bool): Whether to recursively parse embedded documents.
 
-    def get_results(self) -> list[TikaraUnpackedItem]: ...
+        Returns:
+            bool: Whether the embedded document was successfully parsed.
+        """
+        ...
 
-    @property
-    @abstractmethod
-    def max_depth(self) -> int: ...
+    def shouldParseEmbedded(self, metadata: "Metadata") -> bool:  # noqa: N802
+        """Determine whether an embedded document should be parsed.
 
-    @property
-    @abstractmethod
-    def current_depth(self) -> int: ...
+        Args:
+            metadata (Metadata): The metadata of the embedded document.
+
+        Returns:
+            bool: Whether the embedded document should be parsed.
+        """
+        ...
+
+    def get_results(self) -> list[TikaraUnpackedItem]:
+        """Return the list of unpacked embedded documents.
+
+        Returns:
+            list[TikaraUnpackedItem]: The list of unpacked embedded documents.
+        """
+        ...
 
     @classmethod
-    def create(  # noqa: C901
+    def create(
         cls,
         parse_context: "ParseContext",
         parser: "Parser",
         output_dir: Path,
         max_depth: int,
     ) -> Self:
+        """Create a new instance of the underlying Java extractor class.
+
+        Args:
+            parse_context (ParseContext): The parse context to use.
+            parser (Parser): The parser to use.
+            output_dir (Path): The output directory to write unpacked embedded documents to.
+            max_depth (int): The maximum depth to recurse when unpacking embedded documents.
+
+        Returns:
+            Self: The new instance of the extractor that can be passed to the Java side.
+        """
         from org.apache.tika.extractor import EmbeddedDocumentExtractor
         from org.apache.tika.metadata import Metadata, TikaCoreProperties
 
         @JImplements(EmbeddedDocumentExtractor)
-        class RecursiveEmbeddedDocumentExtractorImpl(RecursiveEmbeddedDocumentExtractor):
-            @property
-            @override
-            def max_depth(self) -> int:
-                return self._max_depth
-
-            @property
-            @override
-            def current_depth(self) -> int:
-                return self._current_depth
-
+        class RecursiveEmbeddedDocumentExtractorImpl(_RecursiveEmbeddedDocumentExtractor):
             def __init__(
                 self,
                 parse_context: "ParseContext",
@@ -131,7 +159,7 @@ class RecursiveEmbeddedDocumentExtractor(Protocol):
                 recurse: bool,  # noqa: FBT001
             ) -> bool:
                 try:
-                    if self.current_depth >= self.max_depth:
+                    if self._current_depth >= self._max_depth:
                         return False
                     name = (
                         metadata.get(TikaCoreProperties.RESOURCE_NAME_KEY)
@@ -141,7 +169,7 @@ class RecursiveEmbeddedDocumentExtractor(Protocol):
 
                     output_path = Path(self.output_dir, str(name))
 
-                    with file_output_stream(output_path) as fos, tika_input_stream(stream) as tika_stream:
+                    with _file_output_stream(output_path) as fos, _tika_input_stream(stream) as tika_stream:
                         while True:
                             bytes_read = tika_stream.read()
                             if bytes_read == -1:
@@ -151,14 +179,14 @@ class RecursiveEmbeddedDocumentExtractor(Protocol):
                     self._results.append(
                         TikaraUnpackedItem(
                             file_path=output_path,
-                            metadata=metadata_to_dict(metadata),
+                            metadata=_metadata_to_dict(metadata),
                         )
                     )
 
                     if recurse:
                         self._current_depth += 1
                         try:
-                            with tika_input_stream(output_path, metadata=metadata) as nested_stream:
+                            with _tika_input_stream(output_path, metadata=metadata) as nested_stream:
                                 self._parser.parse(nested_stream, handler, Metadata(), self._context)
                         finally:
                             self._current_depth -= 1
@@ -185,7 +213,7 @@ def _get_metadata(
     content_type: str | None = None,
 ) -> "Metadata":
     """
-    Fills the metadata object with the content type and resource name of the input stream.
+    Fill the metadata object with the content type and resource name of the input stream.
 
     Replicates TikaServer's `org.apache.tika.server.core.resource.TikaResource.fillMetadata` logic
     """
@@ -211,10 +239,10 @@ def _get_metadata(
 
 
 @contextmanager
-def tika_input_stream(
+def _tika_input_stream(
     obj: "str | bytes | Path | BinaryIO | InputStream", *, metadata: "Metadata | None" = None
 ) -> Generator["TikaInputStream", None, None]:
-    """Wraps arbitrary input objects as TikaInputStreams.
+    """Wrap arbitrary input objects as TikaInputStreams.
 
     Args:
         obj (str | bytes | Path | BinaryIO): The input object to wrap.
@@ -238,8 +266,8 @@ def tika_input_stream(
         input_obj = ByteArrayInputStream(obj)
     elif isinstance(obj, InputStream):
         input_obj = obj
-    elif is_binary_io(obj):
-        input_obj = wrap_python_stream(obj)
+    elif _is_binary_io(obj):
+        input_obj = _wrap_python_stream(obj)
     else:
         msg = f"Unsupported input type: {type(obj)}"
         raise TypeError(msg)
@@ -293,7 +321,7 @@ def _handle_file_output(
 
         parser.parse(input_stream, ch, metadata, pc)
 
-        return output_file, metadata_to_dict(metadata)
+        return output_file, _metadata_to_dict(metadata)
     finally:
         if output:
             output.close()
@@ -332,7 +360,7 @@ def _handle_stream_output(
 
     parser.parse(input_stream, ch, metadata, pc)
 
-    return reader_as_binary_stream(output_stream), metadata_to_dict(metadata)
+    return reader_as_binary_stream(output_stream), _metadata_to_dict(metadata)
 
 
 def _handle_string_output(
@@ -366,4 +394,4 @@ def _handle_string_output(
 
     parser.parse(input_stream, ch, metadata, pc)
 
-    return str(ch.toString()), metadata_to_dict(metadata)
+    return str(ch.toString()), _metadata_to_dict(metadata)

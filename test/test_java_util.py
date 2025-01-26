@@ -10,12 +10,12 @@ from jpype import JString
 from tikara.core import Tika
 from tikara.util.java import (
     TIKA_VERSION,
+    _file_output_stream,
     _JavaReaderWrapper,
-    file_output_stream,
+    _wrap_python_stream,
     read_to_string,
     reader_as_binary_stream,
     stream_to_file,
-    wrap_python_stream,
 )
 
 
@@ -358,7 +358,7 @@ class TestWrapPythonStream:
         test_data = b"Hello, World!"
         bio = BytesIO(test_data)
 
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
         assert isinstance(stream, PipedInputStream)
 
         # Read individual bytes from Java stream
@@ -372,7 +372,7 @@ class TestWrapPythonStream:
         test_data = b"x" * 100000
         bio = BytesIO(test_data)
 
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
 
         # Read byte-by-byte
         result = bytearray()
@@ -383,7 +383,7 @@ class TestWrapPythonStream:
 
     def test_empty_stream(self) -> None:
         bio = BytesIO(b"")
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
 
         assert stream.read() == -1  # Java streams return -1 at EOF
 
@@ -392,7 +392,7 @@ class TestWrapPythonStream:
         test_data = bytes(range(256))
         bio = BytesIO(test_data)
 
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
 
         result = bytearray()
         while (b := stream.read()) != -1:
@@ -404,7 +404,7 @@ class TestWrapPythonStream:
         from java.io import IOException
 
         bio = BytesIO(b"test data")
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
 
         stream.close()
 
@@ -416,7 +416,7 @@ class TestWrapPythonStream:
         test_data = b"Hello, World!"
         bio = BytesIO(test_data)
 
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
 
         result = bytearray()
         # Read first 5 bytes
@@ -450,7 +450,7 @@ class TestWrapPythonStream:
 
         test_data = b"x" * 100000
         bio = BytesIO(test_data)
-        stream = wrap_python_stream(bio)
+        stream = _wrap_python_stream(bio)
         results = Queue()
 
         def reader_thread() -> None:
@@ -481,7 +481,7 @@ def temp_dir(tmp_path: Path) -> Path:
 def test_creates_parent_directories(temp_dir: Path) -> None:
     nested_path: Path = temp_dir / "deep" / "nested" / "file.txt"
 
-    with file_output_stream(nested_path) as fos:
+    with _file_output_stream(nested_path) as fos:
         fos.write(JString("test").getBytes())
 
     assert nested_path.parent.exists()
@@ -494,17 +494,17 @@ def test_append_mode(temp_dir: Path) -> None:
     test_str = "test"
 
     # First write
-    with file_output_stream(test_file) as fos:
+    with _file_output_stream(test_file) as fos:
         fos.write(JString(test_str).getBytes())
 
     # Append
-    with file_output_stream(test_file, append=True) as fos:
+    with _file_output_stream(test_file, append=True) as fos:
         fos.write(JString(test_str).getBytes())
 
     assert test_file.read_text() == f"{test_str}{test_str}"
 
     # Overwrite
-    with file_output_stream(test_file, append=False) as fos:
+    with _file_output_stream(test_file, append=False) as fos:
         fos.write(JString("new").getBytes())
 
     assert test_file.read_text() == "new"
@@ -514,7 +514,7 @@ def test_str_path_handling(temp_dir: Path) -> None:
     test_file: str = str(temp_dir / "test.txt")
     test_str = "test"
 
-    with file_output_stream(test_file) as fos:
+    with _file_output_stream(test_file) as fos:
         fos.write(JString(test_str).getBytes())
 
     result_path: Path = Path(test_file)
@@ -526,7 +526,7 @@ def test_file_stream_handles_binary(temp_dir: Path) -> None:
     test_file: Path = temp_dir / "binary.dat"
     test_bytes: bytes = bytes([0x00, 0xFF, 0x0F, 0xF0])
 
-    with file_output_stream(test_file) as fos:
+    with _file_output_stream(test_file) as fos:
         fos.write(test_bytes)
 
     assert test_file.read_bytes() == test_bytes
