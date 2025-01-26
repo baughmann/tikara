@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Generate and deploy documentation
+name: 📚 Generate and deploy documentation
 
 on:
   # Runs on pushes targeting the default branch

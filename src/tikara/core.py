@@ -1,3 +1,5 @@
+"""Contains the core Tika entrypoint. Re-exported from `tikara` so no need to import anything from here externally."""
+
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, BinaryIO, Literal, overload
@@ -5,13 +7,12 @@ from typing import TYPE_CHECKING, Any, BinaryIO, Literal, overload
 from jpype import JProxy
 
 from tikara.util.java import (
+    _is_binary_io,
+    _wrap_python_stream,
     initialize_jvm,
-    is_binary_io,
-    wrap_python_stream,
 )
 from tikara.util.tika import (
     LanguageConfidence,
-    RecursiveEmbeddedDocumentExtractor,
     TikaInputType,
     TikaParseOutputFormat,
     TikaraDetectLanguageResult,
@@ -20,7 +21,8 @@ from tikara.util.tika import (
     _handle_file_output,
     _handle_stream_output,
     _handle_string_output,
-    tika_input_stream,
+    _RecursiveEmbeddedDocumentExtractor,
+    _tika_input_stream,
 )
 
 if TYPE_CHECKING:
@@ -68,25 +70,28 @@ class Tika:
             FileNotFoundError: If specified JAR files don't exist.
 
         Examples:
-            Basic usage:
-            >>> from tikara import Tika
-            >>> tika = Tika()
-            >>> mime_type = tika.detect_mime_type("document.pdf")
-            >>> content, metadata = tika.parse("document.pdf")
+            Basic usage::
 
-            With custom parser:
-            >>> from custom_parser import MarkdownParser
-            >>> tika = Tika(
-            ...     custom_parsers=[MarkdownParser()],
-            ...     custom_mime_types=["text/markdown"]
-            ... )
+                from tikara import Tika
+                tika = Tika()
+                mime_type = tika.detect_mime_type("document.pdf")
+                content, metadata = tika.parse("document.pdf")
 
-            With custom detector:
-            >>> from custom_detector import MarkdownDetector
-            >>> tika = Tika(
-            ...     custom_detectors=[MarkdownDetector()],
-            ...     custom_mime_types=["text/markdown"]
-            ... )
+            With custom parser::
+
+                from custom_parser import MarkdownParser
+                tika = Tika(
+                    custom_parsers=[MarkdownParser()],
+                    custom_mime_types=["text/markdown"]
+                ... )
+
+            With custom detector::
+
+                from custom_detector import MarkdownDetector
+                tika = Tika(
+                    custom_detectors=[MarkdownDetector()],
+                    custom_mime_types=["text/markdown"]
+                ... )
 
         Notes:
             - Custom parsers and detectors must implement the respective Java interfaces from Apache Tika.
@@ -102,7 +107,6 @@ class Tika:
             - examples/custom_parser.ipynb: Custom parser implementation
             - examples/custom_detector.ipynb: Custom detector implementation
         """  # noqa: E501
-
         initialize_jvm(tika_jar_override=tika_jar_override, extra_jars=extra_jars)
 
         custom_detectors = custom_detectors() if callable(custom_detectors) else custom_detectors or []
@@ -169,21 +173,22 @@ class Tika:
             ValueError: If detection fails
 
         Examples:
-            Path input:
-            >>> tika = Tika()
-            >>> tika.detect_mime_type("document.pdf")
-            'application/pdf'
+            Path input::
 
-            Bytes input:
-            >>> with open("document.pdf", "rb") as f:
-            ...     tika.detect_mime_type(f.read())
-            'application/pdf'
+                tika = Tika()
+                tika.detect_mime_type("document.pdf")
 
-            Stream input:
-            >>> from io import BytesIO
-            >>> bio = BytesIO(b"<html><body>Hello</body></html>")
-            >>> tika.detect_mime_type(bio)
-            'text/html'
+            Bytes input::
+
+                with open("document.pdf", "rb") as f:
+                    tika.detect_mime_type(f.read())
+
+
+            Stream input::
+
+                from io import BytesIO
+                bio = BytesIO(b"<html><body>Hello</body></html>")
+                tika.detect_mime_type(bio)
 
         Notes:
             - Supports all >1600 MIME types recognized by Apache Tika
@@ -195,7 +200,6 @@ class Tika:
             - examples/detect_mime_type.ipynb: More detection examples
             - examples/custom_detector.ipynb: Adding custom MIME type detection
         """
-
         from java.io import ByteArrayInputStream, InputStream
         from java.nio.file import Path as JPath
 
@@ -206,8 +210,8 @@ class Tika:
             input_file = Path(obj)
         elif isinstance(obj, bytes):
             input_stream = ByteArrayInputStream(obj)
-        elif is_binary_io(obj):
-            input_stream = wrap_python_stream(obj)
+        elif _is_binary_io(obj):
+            input_stream = _wrap_python_stream(obj)
         else:
             msg = f"Unsupported input type: {type(obj)}"
             raise TypeError(msg)
@@ -254,24 +258,27 @@ class Tika:
             RuntimeError: If language detection fails
 
         Examples:
-            High confidence detection:
-            >>> tika = Tika()
-            >>> result = tika.detect_language("The quick brown fox jumps over the lazy dog")
-            >>> result.language
-            'en'
-            >>> result.confidence
-            LanguageConfidence.HIGH
-            >>> result.raw_score
-            0.999
+            High confidence detection::
 
-            Lower confidence example:
-            >>> result = tika.detect_language("123")
-            >>> result.confidence
-            LanguageConfidence.LOW
+                tika = Tika()
+                result = tika.detect_language("The quick brown fox jumps over the lazy dog")
+                result.language
+                'en'
+                result.confidence
+                LanguageConfidence.HIGH
+                result.raw_score
+                0.999
 
-            Other languages:
-            >>> tika.detect_language("El rápido zorro marrón salta sobre el perro perezoso").language
-            'es'
+            Lower confidence example::
+
+                result = tika.detect_language("123")
+                result.confidence
+                LanguageConfidence.LOW
+
+            Other languages::
+
+                tika.detect_language("El rápido zorro marrón salta sobre el perro perezoso").language
+                'es'
 
         Notes:
             - Models are loaded lazily on first use unless lazy_load=False in constructor
@@ -282,7 +289,6 @@ class Tika:
         See Also:
             - examples/detect_language.ipynb: Additional language detection examples
         """
-
         self._ensure_language_models_loaded()
 
         result = self._language_detector.detect(content)
@@ -330,17 +336,19 @@ class Tika:
             RuntimeError: If extraction fails
 
         Examples:
-            Basic extraction:
-            >>> tika = Tika()
-            >>> items = tika.unpack("presentation.pptx", Path("extracted/"))
-            >>> for item in items:
-            ...     print(f"Found {item.metadata['Content-Type']} at {item.file_path}")
-            Found image/png at extracted/image1.png
-            Found application/pdf at extracted/embedded.pdf
+            Basic extraction::
 
-            Recursive extraction:
-            >>> tika.unpack("container.docx", Path("out/"), max_depth=3)
-            [TikaraUnpackedItem(file_path='out/image1.emf', metadata={...}),
+                tika = Tika()
+                items = tika.unpack("presentation.pptx", Path("extracted/"))
+                for item in items:
+                    print(f"Found {item.metadata['Content-Type']} at {item.file_path}")
+                Found image/png at extracted/image1.png
+                Found application/pdf at extracted/embedded.pdf
+
+            Recursive extraction::
+
+                tika.unpack("container.docx", Path("out/"), max_depth=3)
+                [TikaraUnpackedItem(file_path='out/image1.emf', metadata={...}),
                 TikaraUnpackedItem(file_path='out/report.pdf', metadata={...}),
                 TikaraUnpackedItem(file_path='out/report/chart.png', metadata={...})]
 
@@ -371,7 +379,7 @@ class Tika:
         pc = ParseContext()
         pc.set(Parser, self._parser)
         pc.set(ContentHandler, ch)
-        extractor = RecursiveEmbeddedDocumentExtractor.create(
+        extractor = _RecursiveEmbeddedDocumentExtractor.create(
             parse_context=pc,
             parser=self._parser,
             output_dir=output_dir,
@@ -386,7 +394,7 @@ class Tika:
             ),
         )
 
-        with tika_input_stream(obj, metadata=metadata) as input_stream:
+        with _tika_input_stream(obj, metadata=metadata) as input_stream:
             self._parser.parse(input_stream, ch, metadata, pc)
 
             return extractor.get_results()
@@ -414,9 +422,11 @@ class Tika:
         Returns:
             tuple: (extracted_text: str, metadata: dict)
 
-        Example:
-            >>> text, meta = tika.parse("document.pdf", output_format="txt")
-            >>> print(text[:100])  # First 100 chars
+        Examples:
+            ::
+                tika = Tika()
+                text, meta = tika.parse("document.pdf", output_format="txt")
+                print(text[:100])  # First 100 chars
         """
         ...
 
@@ -445,9 +455,11 @@ class Tika:
         Returns:
             tuple: (output_file_path: Path, metadata: dict)
 
-        Example:
-            >>> path, meta = tika.parse("large.pdf", output_file="text.txt")
-            >>> print(f"Saved to {path}")
+        Examples:
+            ::
+                tika = Tika()
+                path, meta = tika.parse("large.pdf", output_file="text.txt")
+                print(f"Saved to {path}")
         """
         ...
 
@@ -476,10 +488,12 @@ class Tika:
         Returns:
             tuple: (content_stream: BinaryIO, metadata: dict)
 
-        Example:
-            >>> stream, meta = tika.parse("huge.pdf", output_stream=True)
-            >>> for chunk in stream:
-            ...     process_chunk(chunk)
+        Examples:
+            ::
+                tika = Tika()
+                stream, meta = tika.parse("huge.pdf", output_stream=True)
+                for chunk in stream:
+                    process_chunk(chunk)
         """
         ...
 
@@ -541,35 +555,39 @@ class Tika:
             TypeError: If input type not supported
 
         Examples:
-            Basic text extraction:
-            >>> tika = Tika()
-            >>> content, meta = tika.parse("report.pdf")
-            >>> print(f"Title: {meta.get('title')}")
-            >>> print(content[:100])  # First 100 chars
+            Basic text extraction::
 
-            Stream output:
-            >>> content, meta = tika.parse(
-            ...     "large.pdf",
-            ...     output_stream=True,
-            ...     output_format="txt"
-            ... )
-            >>> for line in content:
-            ...     process(line)
+                tika = Tika()
+                content, meta = tika.parse("report.pdf")
+                print(f"Title: {meta.get('title')}")
+                print(content[:100])  # First 100 chars
 
-            Save to file:
-            >>> path, meta = tika.parse(
-            ...     "input.docx",
-            ...     output_file="extracted.txt",
-            ...     output_format="txt"
-            ... )
+            Stream output::
 
-            Parse bytes with hints:
-            >>> with open("doc.pdf", "rb") as f:
-            ...     content, meta = tika.parse(
-            ...         f.read(),
-            ...         input_file_name="doc.pdf",
-            ...         content_type="application/pdf"
-            ...     )
+                content, meta = tika.parse(
+                    "large.pdf",
+                    output_stream=True,
+                    output_format="txt"
+                ... )
+                for line in content:
+                    process(line)
+
+            Save to file::
+
+                path, meta = tika.parse(
+                    "input.docx",
+                    output_file="extracted.txt",
+                    output_format="txt"
+                ... )
+
+            Parse bytes with hints::
+
+                with open("doc.pdf", "rb") as f:
+                    content, meta = tika.parse(
+                        f.read(),
+                        input_file_name="doc.pdf",
+                        content_type="application/pdf"
+                    )
 
         Notes:
             - "xhtml" format preserves document structure
@@ -582,7 +600,6 @@ class Tika:
         See Also:
             - examples/parsing.ipynb: More parsing examples
         """
-
         output_mode: Literal["string", "file", "stream"]
         if output_stream:
             output_mode = "stream"
@@ -604,7 +621,7 @@ class Tika:
         )
 
         # Create input stream
-        with tika_input_stream(obj, metadata=metadata) as input_stream:
+        with _tika_input_stream(obj, metadata=metadata) as input_stream:
             match output_mode:
                 case "file":
                     if not output_file:

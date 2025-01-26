@@ -1,3 +1,5 @@
+"""Java and JVM utilities mostly focused on I/O operations."""
+
 import os
 from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -52,6 +54,8 @@ def get_jars() -> list[Path]:
 
 def initialize_jvm(tika_jar_override: Path | None = None, extra_jars: list[Path] | None = None) -> None:
     """
+    Initialize the JVM.
+
     Tries to start the JVM with the Tika JAR file(s) in the classpath.
     If the JVM is already started, checks if the Tika JAR file(s) are in the classpath.
     """
@@ -207,7 +211,15 @@ class _JavaReaderWrapper(BinaryIO):
         raise UnsupportedOperation(msg)
 
 
-def wrap_python_stream(python_stream: BinaryIO) -> "PipedInputStream":
+def _wrap_python_stream(python_stream: BinaryIO) -> "PipedInputStream":
+    """Wrap a Python binary stream as a Java PipedInputStream.
+
+    Args:
+        python_stream (BinaryIO): The Python binary stream to wrap.
+
+    Returns:
+        PipedInputStream: The Java PipedInputStream that reads from the Python stream.
+    """
     from java.io import PipedInputStream, PipedOutputStream
 
     input_stream = PipedInputStream(8192)
@@ -313,7 +325,15 @@ def reader_as_binary_stream(source: "Reader | ByteArrayOutputStream") -> BinaryI
     return _JavaReaderWrapper(source)
 
 
-def is_binary_io(obj: Any) -> TypeGuard[BinaryIO]:  # noqa: ANN401
+def _is_binary_io(obj: Any) -> TypeGuard[BinaryIO]:  # noqa: ANN401
+    """Type guard for BinaryIO.
+
+    Args:
+        obj (Any): The object to check.
+
+    Returns:
+        TypeGuard[BinaryIO]: Asserts if the object is a BinaryIO.
+    """
     return isinstance(obj, BufferedIOBase)
 
 
@@ -333,8 +353,8 @@ def output_stream_to_reader(java_output_stream: "ByteArrayOutputStream") -> "Rea
 
 
 @contextmanager
-def file_output_stream(file_path: Path | str, *, append: bool = False) -> Generator["FileOutputStream", None, None]:
-    """Wraps a file path as a FileOutputStream.
+def _file_output_stream(file_path: Path | str, *, append: bool = False) -> Generator["FileOutputStream", None, None]:
+    """Wrap a file path as a FileOutputStream.
 
     Args:
         file_path (Path): The file path to wrap.
