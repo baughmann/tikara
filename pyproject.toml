@@ -79,12 +79,9 @@ keywords = [
     "structured-data",
     "text-analytics",
     "text-extraction",
-    "text-extraction",
-    "text-extraction",
     "text-mining",
     "text-parsing",
     "text-processing",
-    "text-recognition",
     "text-recognition",
     "tika",
     "unstructured-data",
@@ -92,10 +89,7 @@ keywords = [
 ]
 license = "Apache-2.0"
 license-files = ["LICEN[CS]E*"]
-dependencies = [
-    "jpype1>=1.5.1",
-    "pydantic>=2.10.5",
-]
+dependencies = ["jpype1>=1.5.1", "pydantic>=2.10.5"]
 
 [project.urls]
 Homepage = "https://github.com/baughmann/tikara"
