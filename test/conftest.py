@@ -21,7 +21,7 @@ def readme() -> Path:
     return path
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def tika() -> Tika:
     return Tika()
 
@@ -65,7 +65,7 @@ def test_recursive_embedded_docx() -> Path:
     return path
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def tika_container() -> Generator[DockerContainer, None, None]:
     """Create a Tika instance using the full Tika server."""
     tika_container = DockerContainer("apache/tika:latest-full").with_exposed_ports(9998)
@@ -76,3 +76,36 @@ def tika_container() -> Generator[DockerContainer, None, None]:
     yield tika_container
 
     tika_container.stop()
+
+
+ALL_VALID_DOCS: list[Path] = [
+    Path("./test/data/demo.docx"),
+    Path("./test/data/testPDF_childAttachments.pdf"),
+    Path("./test/data/hello_world.txt"),
+    Path("./test/data/test_recursive_embedded.docx"),
+    Path("./test/data/2023-half-year-analyses-by-segment.xlsx"),
+    Path("./test/data/CantinaBand3.wav"),
+    Path("./test/data/category-level.docx"),
+    Path("./test/data/coffee.xls"),
+    Path("./test/data/contains-pictures.docx"),
+    Path("./test/data/docx-shapes.docx"),
+    Path("./test/data/docx-tables.docx"),
+    Path("./test/data/duplicate-paragraphs.docx"),
+    Path("./test/data/emoji.xlsx"),
+    Path("./test/data/failure-after-repair.pdf"),
+    Path("./test/data/fake-email.eml"),
+    Path("./test/data/fake-email-multiple-attachments.msg"),
+    Path("./test/data/fake-email-with-cc-and-bcc.msg"),
+    Path("./test/data/korean-text-with-tables.pdf"),
+    Path("./test/data/README.md"),
+    Path("./test/data/README.org"),
+    Path("./test/data/science-exploration-369p.pptx"),
+    Path("./test/data/simple.epub"),
+    Path("./test/data/test.zip"),
+]
+
+ALL_INVALID_DOCS: list[Path] = [
+    Path("./test/data/bad_xml.xml"),
+]
+
+ALL_DOCS: list[Path] = ALL_VALID_DOCS + ALL_INVALID_DOCS

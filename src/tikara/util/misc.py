@@ -1,13 +1,15 @@
 """Miscellaneous utility functions."""
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from tikara.util.tika import TikaParseOutputFormat
+if TYPE_CHECKING:
+    from tikara.data_types import TikaParseOutputFormat
 
 
 def _validate_and_prepare_output_file(
     output_file: Path | str | None,
-    output_format: TikaParseOutputFormat,
+    output_format: "TikaParseOutputFormat",
 ) -> Path | None:
     if output_file:
         if isinstance(output_file, str):
@@ -19,3 +21,12 @@ def _validate_and_prepare_output_file(
         return output_file
 
     return None
+
+
+def _validate_input_file(input_file: Path | str) -> Path:
+    if isinstance(input_file, str):
+        input_file = Path(input_file)
+    if not input_file.exists():
+        msg = f"File not found: {input_file}"
+        raise FileNotFoundError(msg)
+    return input_file
