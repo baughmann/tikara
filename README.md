@@ -2,7 +2,6 @@
 
 <img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/tikara_logo.svg" width="100" alt="Tikara Logo" />
 
-
 ![Coverage](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/coverage.xml&query=/coverage/@line-rate%20*%20100&suffix=%25&color=brightgreen&label=coverage) ![Tests](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/junit.xml&query=/testsuites/testsuite/@tests&label=tests&color=green) ![PyPI](https://img.shields.io/pypi/v/tikara) ![GitHub License](https://img.shields.io/github/license/baughmann/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/baughmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/baughmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
 
 ## 🚀 Overview
@@ -296,19 +295,6 @@ Note: Generated stubs are git-ignored but provide IDE support and type hints whe
 ## 📚 Reference
 
 See [API Documentation](https://baughmann.github.io/tikara/autoapi/tikara/index.html#tikara.Tika) for complete details.
-
-### Main Classes
-
-- [`Tika`](https://baughmann.github.io/tikara/autoapi/tikara/index.html#tikara.Tika): Primary interface
-- [`TikaraDetectLanguageResult`](https://baughmann.github.io/tikara/autoapi/tikara/util/tika/index.html#tikara.util.tika.TikaraDetectLanguageResult): Language detection results
-- [`TikaraUnpackedItem`](https://baughmann.github.io/tikara/autoapi/tikara/util/tika/index.html#tikara.util.tika.TikaraUnpackedItem): Extracted document information
-
-### Common Parameters
-
-- `output_format`: "txt" or "xhtml"
-- `output_stream`: Boolean for stream output
-- `max_depth`: Integer for recursive extraction
-- `content_type`: Optional MIME type hint
 
 ## 📄 License
 

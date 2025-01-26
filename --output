@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+          integrity="sha256-wLz3iY/cO4e6vKZ4zRmo4+9XDpMcgKOvv/zEU3OMlRo=" crossorigin="anonymous">
+    <title>Safety Check Report</title>
+</head>
+<body>
+<div class="container">
+
+    
+
+    <h1 class="text-center mb-3 mt-5">Safety Scan Report</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card my-2">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Scan Summary</h4>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="card bg-secondary bg-opacity-25 text-black">
+                                <div class="card-body">
+                                    <p class="card-text">Packages Found (<a href="#scanned-packages">details &#8595;</a>)</p>
+                                    <h5 class="card-title fs-3">156</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success  bg-opacity-25 text-black">
+                                <div class="card-body">
+                                    <p class="card-text">Vulnerabilities Reported (<a href="#vulnerabilities-found">details &#8595;</a>)</p>
+                                    <h5 class="card-title fs-3">0</h5>
+                                    
+                                        <p>Found vulnerabilities that were ignored: 1</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="mt-3 card bg-secondary bg-opacity-10">
+                        <div class="card-body fs-sm">
+                            <h5 class="mb-2">Meta-data</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="my-1"><span class="fw-bold">Time</span>: 2025-01-26 16:29:40.752031</p>
+                                    <p class="my-1"><span class="fw-bold">Safety version</span>: 3.2.9</p>
+                                    <p class="my-1">
+                                        
+                                            <span class="fw-bold">Token authentication using the Safety's proprietary vulnerability database</span>
+                                                                                
+                                    </p>
+                                    <p class="my-1">
+                                        <span class="fw-bold">Configuration file: </span>
+                                        
+                                            None
+                                        
+                                    </p>
+                                    
+                                        <p class="my-1"><span class="fw-bold">Audit and monitor: </span>Enabled. Logging scan results to <a href="https://platform.safetycli.com">Safety Platform &#8594;</a></p>
+                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="my-1"><span class="fw-bold">Scan ecosystems</span>:</p>
+                                        <ul>
+                                            
+                                            <li><span class="fw-bold">Python</span>: Python requirements files, Python poetry lock files, Python Pipfile lock files, Python environments</li>
+                                            
+                                        </ul>
+                                    <p class="my-1"><span class="fw-bold">Scan paths</span>: <br/></p>
+                                        <ul>
+                                            
+                                            <li>/home/nbaughman/Projects/tikara</li>
+                                            
+                                        </ul>
+                                    
+                                        <p class="my-1"><span class="fw-bold">Scan git context</span></p>
+                                        <p class="my-1"><span class="fw-bold"> &nbsp; origin: </span> https://github.com/baughmann/tikara</p>
+                                        <p class="my-1"><span class="fw-bold"> &nbsp; branch: </span> master</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+        <div class="card mt-5">
+            <h2 class="mt-5 mb-3 px-4">Python environment: <small class="text-muted">/home/nbaughman/Projects/tikara/.venv/pyvenv.cfg</small></h2> 
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12" id="scanned-packages">
+                        <h4 class="mt-2 mb-3 px-2">Scanned Packages [ <a href="#scanned-packages">#</a> ]</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Package name</th>
+                                    <th>Found requirements</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                        <tr>
+                                            <td>sphinxemoji</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxemoji==0.3.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>wcwidth</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>wcwidth==0.2.13</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx_git</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx_git==11.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jupyter_client</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jupyter_client==8.6.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jinja2</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jinja2==3.1.5</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>myst_parser</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>myst_parser==4.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pytest_html</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pytest_html==4.1.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pyzmq</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pyzmq==26.2.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>wrapt</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>wrapt==1.17.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>memory_profiler</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>memory_profiler==0.61.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>prompt_toolkit</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>prompt_toolkit==3.0.50</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>setuptools</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>setuptools==75.8.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>httptools</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>httptools==0.6.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>safety_schemas</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>safety_schemas==0.0.5</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>googleapis_common_protos</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>googleapis_common_protos==1.66.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>click</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>click==8.1.8</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>parso</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>parso==0.8.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxawesome_theme</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxawesome_theme==5.3.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>proto_plus</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>proto_plus==1.25.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>uvicorn</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>uvicorn==0.34.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>websockets</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>websockets==14.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ptyprocess</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ptyprocess==0.7.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jsonschema</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jsonschema==4.23.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ray</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ray==2.41.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pyflakes</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pyflakes==3.2.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>cachetools</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>cachetools==5.5.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sniffio</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sniffio==1.3.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>requests</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>requests==2.32.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>anyio</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>anyio==4.8.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>PyYAML</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>PyYAML==6.0.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>charset_normalizer</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>charset_normalizer==3.4.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>opencensus</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>opencensus==0.11.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>stubgenj</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>stubgenj==0.2.12</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>smmap</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>smmap==5.0.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>astroid</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>astroid==3.3.8</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>imagesize</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>imagesize==1.4.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jpype1</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jpype1==1.5.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>colorful</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>colorful==0.5.6</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>aiohttp</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>aiohttp==3.11.11</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>marshmallow</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>marshmallow==3.25.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>docker</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>docker==7.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>attrs</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>attrs==25.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>GitPython</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>GitPython==3.1.44</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>py_spy</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>py_spy==0.4.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>aiosignal</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>aiosignal==1.3.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>mdit_py_plugins</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>mdit_py_plugins==0.4.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pycodestyle</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pycodestyle==2.12.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>dparse</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>dparse==0.6.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ipython</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ipython==8.31.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>matplotlib_inline</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>matplotlib_inline==0.1.7</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>starlette</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>starlette==0.45.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>multidict</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>multidict==6.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ruff</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ruff==0.9.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pyasn1_modules</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pyasn1_modules==0.4.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>flake8</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>flake8==7.1.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jedi</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jedi==0.19.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>h11</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>h11==0.14.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>urllib3</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>urllib3==2.3.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx==8.1.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>certifi</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>certifi==2024.12.14</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>asttokens</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>asttokens==3.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>iniconfig</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>iniconfig==2.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>typing_extensions</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>typing_extensions==4.12.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>propcache</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>propcache==0.2.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pytest</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pytest==8.3.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ruamel.yaml.clib</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ruamel.yaml.clib==0.2.12</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>defusedxml</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>defusedxml==0.7.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>decorator</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>decorator==5.1.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pure_eval</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pure_eval==0.2.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>google_auth</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>google_auth==2.38.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ruamel.yaml</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ruamel.yaml==0.18.10</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx_autodoc_typehints</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx_autodoc_typehints==3.0.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>aiohappyeyeballs</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>aiohappyeyeballs==2.4.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>rsa</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>rsa==4.9</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pydocstyle</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pydocstyle==6.3.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pluggy</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pluggy==1.5.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>nest_asyncio</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>nest_asyncio==1.6.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxcontrib_applehelp</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxcontrib_applehelp==2.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>packaging</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>packaging==24.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>idna</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>idna==3.10</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>babel</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>babel==2.16.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>shellingham</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>shellingham==1.5.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>executing</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>executing==2.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>safety</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>safety==3.2.9</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>prometheus_client</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>prometheus_client==0.21.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>aiohttp_cors</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>aiohttp_cors==0.7.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>alabaster</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>alabaster==1.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>py_cpuinfo</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>py_cpuinfo==9.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>docutils</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>docutils==0.21.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>platformdirs</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>platformdirs==4.3.6</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pygments</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pygments==2.19.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxcontrib_serializinghtml</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxcontrib_serializinghtml==2.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>tornado</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>tornado==6.4.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>MarkupSafe</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>MarkupSafe==3.0.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pyasn1</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pyasn1==0.6.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx_design</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx_design==0.6.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>filelock</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>filelock==3.12.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>debugpy</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>debugpy==1.8.12</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>grpcio</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>grpcio==1.70.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>protobuf</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>protobuf==5.29.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>genbadge</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>genbadge==1.1.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pydantic_core</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pydantic_core==2.27.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pexpect</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pexpect==4.9.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>flake8_html</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>flake8_html==0.4.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jupyter_core</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jupyter_core==5.7.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>gitdb</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>gitdb==4.0.12</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>traitlets</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>traitlets==5.14.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>beautifulsoup4</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>beautifulsoup4==4.12.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>psutil</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>psutil==6.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>Authlib</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>Authlib==1.4.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>mdurl</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>mdurl==0.1.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>opencensus_context</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>opencensus_context==0.1.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pycparser</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pycparser==2.22</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>ipykernel</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>ipykernel==6.29.5</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pytest_benchmark</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pytest_benchmark==5.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>soupsieve</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>soupsieve==2.6</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>fastapi</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>fastapi==0.115.7</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>coverage</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>coverage==7.6.10</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>tikara</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>tikara==0.1.4.post1.dev7+g3fdf446.d20250126</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>google_api_core</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>google_api_core==2.24.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pillow</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pillow==11.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>smart_open</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>smart_open==7.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx_autodoc_defaultargs</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx_autodoc_defaultargs==0.1.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>virtualenv</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>virtualenv==20.29.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>distlib</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>distlib==0.3.9</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>snowballstemmer</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>snowballstemmer==2.2.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>stack_data</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>stack_data==0.6.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx_autoapi</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx_autoapi==3.4.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>cryptography</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>cryptography==44.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>python_dateutil</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>python_dateutil==2.9.0.post0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxcontrib_htmlhelp</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxcontrib_htmlhelp==2.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pytest_metadata</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pytest_metadata==3.1.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxcontrib_jsmath</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxcontrib_jsmath==1.0.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinx_sitemap</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinx_sitemap==2.6.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>referencing</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>referencing==0.36.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>jsonschema_specifications</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>jsonschema_specifications==2024.10.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>rich</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>rich==13.9.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>frozenlist</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>frozenlist==1.5.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>annotated_types</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>annotated_types==0.7.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pydantic</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pydantic==2.10.5</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>watchfiles</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>watchfiles==1.0.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>testcontainers</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>testcontainers==4.9.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxcontrib_qthelp</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxcontrib_qthelp==2.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>rpds_py</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>rpds_py==0.22.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>yarl</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>yarl==1.18.3</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>cffi</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>cffi==1.17.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>msgpack</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>msgpack==1.1.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>comm</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>comm==0.2.2</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>six</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>six==1.17.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>python_dotenv</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>python_dotenv==1.0.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>pytest_cov</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>pytest_cov==6.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>sphinxcontrib_devhelp</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>sphinxcontrib_devhelp==2.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>markdown_it_py</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>markdown_it_py==3.0.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>typer</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>typer==0.15.1</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>mccabe</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>mccabe==0.7.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>uvloop</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>uvloop==0.21.0</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12" id="vulnerabilities-found">
+                        <h4 class="mt-2 mb-3 px-2">Vulnerabilities Reported [ <a href="#vulnerabilities-found">#</a> ]</h4>
+                        
+                            <p class="mx-2">
+                                No known security vulnerabilities were found.
+                                
+                            </p>
+                        
+                    </div>
+                </div>
+
+                
+                    <div class="row">
+                        <div class="col-12" id="vulnerabilities-ignored">
+                            <h4 class="mt-4 mb-3 px-2">Vulnerabilities ignored [ <a href="#vulnerabilities-ignored">#</a> ]</h4>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Vulnerability ID</th>
+                                        <th>Package name</th>
+                                        <th>Version/Spec</th>
+                                        <th>Notes</th>
+                                        <th>Expires</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    
+                                        <tr>
+                                            <td><a href="https://data.safetycli.com/v/65189/eda" target="_blank">65189</a></td>
+                                            <td>ray</td>
+                                            <td>
+                                                
+                                                    2.41.0
+                                                
+                                            </td>
+                                            <td>Ignored environment by rule in policy file.</td>
+                                            <td>-</td>
+                                        </tr>
+                                    
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                
+
+                
+
+                
+
+            </div>
+        </div>
+
+
+    
+
+    
+
+    <div class="my-5 text-center text-secondary fst-italic">
+        <p>Safety Scanner and vulnerability data proudly maintained by <a href="https://safetycli.com" target="_blank">Safety Cybersecurity</a></p>
+    </div>
+
+    <div style="height:400px;">
+        &nbsp;
+    </div>
+
+</div>
+</body>
+</html>

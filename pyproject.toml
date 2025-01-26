@@ -92,7 +92,10 @@ keywords = [
 ]
 license = "Apache-2.0"
 license-files = ["LICEN[CS]E*"]
-dependencies = ["jpype1>=1.5.1"]
+dependencies = [
+    "jpype1>=1.5.1",
+    "pydantic>=2.10.5",
+]
 
 [project.urls]
 Homepage = "https://github.com/baughmann/tikara"
@@ -133,6 +136,7 @@ dev = [
     "pytest-benchmark>=5.1.0",
     "pytest-cov>=6.0.0",
     "pytest-html>=4.1.1",
+    "ray[serve]>=2.41.0",
     "ruff>=0.9.2",
     "safety>=3.2.9",
     "sphinx>=8.1.3",

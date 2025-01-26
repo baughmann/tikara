@@ -66,9 +66,6 @@ highlight_language = 'python3'
 # Suppress warnings for duplicate labels
 suppress_warnings = ["autosectionlabel.*"]
 
-html_logo ="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/tikara_logo.svg"
-
-
 
 # -- Options for HTML output -------------------------------------------------
 html_baseurl = "https://baughmann.github.io/tikara/"
