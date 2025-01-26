@@ -2,23 +2,23 @@ import pytest
 import requests
 from testcontainers.core.container import DockerContainer
 
-from tikara.core import LanguageConfidence, Tika
+from tikara.core import Tika, TikaLanguageConfidence
 
-TEST_TEXTS: list[tuple[str, str, LanguageConfidence, float]] = [
-    ("en", "The quick brown fox jumps over the lazy dog", LanguageConfidence.HIGH, 0.9),
+TEST_TEXTS: list[tuple[str, str, TikaLanguageConfidence, float]] = [
+    ("en", "The quick brown fox jumps over the lazy dog", TikaLanguageConfidence.HIGH, 0.9),
     (
         "es",
         "El rápido zorro marrón salta sobre el perro perezoso",
-        LanguageConfidence.HIGH,
+        TikaLanguageConfidence.HIGH,
         0.9,
     ),
-    ("de", "Der schnelle braune Fuchs springt über den faulen Hund", LanguageConfidence.HIGH, 0.9),
+    ("de", "Der schnelle braune Fuchs springt über den faulen Hund", TikaLanguageConfidence.HIGH, 0.9),
 ]
 
 
 @pytest.mark.parametrize(("language", "text", "confidence", "raw_score_min"), TEST_TEXTS)
 def test_detect_language_from_str(
-    tika: Tika, language: str, text: str, confidence: LanguageConfidence, raw_score_min: float
+    tika: Tika, language: str, text: str, confidence: TikaLanguageConfidence, raw_score_min: float
 ) -> None:
     """Test language detection from string buffer."""
     result = tika.detect_language(text)
@@ -43,7 +43,7 @@ def test_detect_language_from_str_compare_with_tika_server(
     tika: Tika,
     language: str,
     text: str,
-    confidence: LanguageConfidence,
+    confidence: TikaLanguageConfidence,
     raw_score_min: float,
     tika_server_detect_language_request_params: tuple[str, dict[str, str]],
 ) -> None:

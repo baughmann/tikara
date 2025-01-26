@@ -5,10 +5,8 @@ from unittest.mock import Mock
 
 import pytest
 
+from tikara.data_types import TikaLanguageConfidence, TikaMetadata, TikaUnpackedItem
 from tikara.util.tika import (
-    LanguageConfidence,
-    TikaraUnpackedItem,
-    _metadata_to_dict,
     _RecursiveEmbeddedDocumentExtractor,
     _tika_input_stream,
 )
@@ -33,12 +31,12 @@ def sample_metadata() -> "Metadata":
 
 
 def test_metadata_to_dict(sample_metadata: "Metadata") -> None:
-    result = _metadata_to_dict(sample_metadata)
+    result = TikaMetadata._metadata_to_dict(sample_metadata)
     assert result == {"key1": "value1", "key2": "value2"}
 
 
 def test_tikara_unpacked_item() -> None:
-    item = TikaraUnpackedItem(metadata={"key": "value"}, file_path=Path("/test/path"))
+    item = TikaUnpackedItem(metadata={"key": "value"}, file_path=Path("/test/path"))
     assert item.metadata == {"key": "value"}
     assert item.file_path == Path("/test/path")
 
@@ -48,10 +46,10 @@ def test_tikara_unpacked_item() -> None:
 
 
 def test_language_confidence_enum() -> None:
-    assert LanguageConfidence.HIGH == "HIGH"
-    assert LanguageConfidence.MEDIUM == "MEDIUM"
-    assert LanguageConfidence.LOW == "LOW"
-    assert LanguageConfidence.NONE == "NONE"
+    assert TikaLanguageConfidence.HIGH == "HIGH"
+    assert TikaLanguageConfidence.MEDIUM == "MEDIUM"
+    assert TikaLanguageConfidence.LOW == "LOW"
+    assert TikaLanguageConfidence.NONE == "NONE"
 
 
 def test_tika_input_stream_with_path(temp_dir: Path) -> None:
