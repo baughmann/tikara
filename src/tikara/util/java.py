@@ -12,6 +12,8 @@ import jpype
 import jpype.imports
 from jpype.types import JArray, JChar, JString
 
+from tikara.error_handling import TikaInitializationError, wrap_exceptions
+
 if TYPE_CHECKING:
     from java.io import (
         ByteArrayOutputStream,
@@ -52,6 +54,7 @@ def get_jars() -> list[Path]:
     return [Path(tikara_path, f"jars/tika-{package}-{TIKA_VERSION}.jar") for package in packages]
 
 
+@wrap_exceptions
 def initialize_jvm(tika_jar_override: Path | None = None, extra_jars: list[Path] | None = None) -> None:
     """
     Initialize the JVM.
@@ -65,13 +68,13 @@ def initialize_jvm(tika_jar_override: Path | None = None, extra_jars: list[Path]
     if tika_jar_override:
         if not tika_jar_override.exists():
             msg = f"Custom Tika JAR file not found at: {tika_jar_override}"
-            raise FileNotFoundError(msg)
+            raise TikaInitializationError from FileNotFoundError(msg)
         classpath = [tika_jar_override]
     if extra_jars:
         for jar in extra_jars:
             if not jar.exists():
                 msg = f"Extra JAR file not found at: {jar}"
-                raise FileNotFoundError(msg)
+                raise TikaInitializationError from FileNotFoundError(msg)
             classpath.append(jar)
 
     if not jpype.isJVMStarted():
@@ -82,7 +85,7 @@ def initialize_jvm(tika_jar_override: Path | None = None, extra_jars: list[Path]
 
     if "tika" not in existing_classpath.casefold():
         msg = "JVM was already started, but Tika JAR file was not found in the classpath."
-        raise RuntimeError(msg)
+        raise TikaInitializationError from RuntimeError(msg)
 
 
 #

@@ -11,6 +11,7 @@ from testcontainers.core.container import DockerContainer
 from test.conftest import ALL_INVALID_DOCS, ALL_VALID_DOCS
 from tikara import Tika
 from tikara.data_types import TikaMetadata
+from tikara.error_handling import TikaError, TikaInputTypeError
 
 if TYPE_CHECKING:
     from org.apache.tika.detect import Detector
@@ -122,12 +123,12 @@ def test_parse_to_stream_with_content_type(
 
 
 def test_parse_with_invalid_input(tika: Tika) -> None:
-    with pytest.raises(TypeError, match="Unsupported input type"):
+    with pytest.raises(TikaInputTypeError):
         tika.parse(123)  # type: ignore  # noqa: PGH003
 
 
 def test_parse_with_nonexistent_file(tika: Tika) -> None:
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(TikaError):
         tika.parse(Path("nonexistent.docx"))
 
 
@@ -448,5 +449,5 @@ def test_parse_all_valid_docs_no_errors(tika: Tika, input_file_path: Path) -> No
 
 @pytest.mark.parametrize("input_file_path", ALL_INVALID_DOCS)
 def test_parse_all_invalid_docs_no_errors(tika: Tika, input_file_path: Path) -> None:
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(TikaError):
         tika.parse(input_file_path)

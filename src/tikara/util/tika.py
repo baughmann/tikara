@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, BinaryIO, Protocol, Self
 from jpype import JImplements, JOverride
 
 from tikara.data_types import TikaMetadata, TikaParseOutputFormat, TikaUnpackedItem
+from tikara.error_handling import TikaInputTypeError, TikaOutputFormatError
 from tikara.util.java import _file_output_stream, _is_binary_io, _wrap_python_stream, reader_as_binary_stream
 from tikara.util.misc import _validate_input_file
 
@@ -232,8 +233,7 @@ def _tika_input_stream(
     elif _is_binary_io(obj):
         input_obj = _wrap_python_stream(obj)
     else:
-        msg = f"Unsupported input type: {type(obj)}"
-        raise TypeError(msg)
+        raise TikaInputTypeError._from_input_type(type(obj))
 
     try:
         if isinstance(input_obj, InputStream):
@@ -273,8 +273,7 @@ def _handle_file_output(
             output = FileWriter(str(output_file))
             ch = BodyContentHandler(output)
         else:
-            msg = f"Unsupported output format: {output_format}"
-            raise ValueError(msg)
+            raise TikaOutputFormatError._from_output_format(output_format)
 
         pc = ParseContext()
         pc.set(Parser, parser)
@@ -312,8 +311,7 @@ def _handle_stream_output(
     elif output_format == "txt":
         ch = BodyContentHandler(OutputStreamWriter(output_stream, "UTF-8"))
     else:
-        msg = f"Unsupported output format: {output_format}"
-        raise ValueError(msg)
+        raise TikaOutputFormatError._from_output_format(output_format)
 
     pc = ParseContext()
     pc.set(Parser, parser)

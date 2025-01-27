@@ -7,6 +7,7 @@ import requests
 from testcontainers.core.container import DockerContainer
 
 from tikara import Tika
+from tikara.error_handling import TikaInputArgumentsError, TikaInputFileNotFoundError
 
 TEST_FILES = {
     "txt": ("plain.txt", "Hello world", "text/plain"),
@@ -88,11 +89,11 @@ class TestDetectMimeType:
         assert expected_type == result_str.casefold()
 
     def test_detect_mime_type_invalid_type(self, tika: Tika) -> None:
-        with pytest.raises(TypeError):
+        with pytest.raises(TikaInputArgumentsError):
             tika.detect_mime_type(123)  # type: ignore  # noqa: PGH003
 
     def test_detect_mime_type_nonexistent_file(self, tika: Tika) -> None:
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(TikaInputFileNotFoundError):
             tika.detect_mime_type(Path("/nonexistent/file"))
 
     @pytest.fixture

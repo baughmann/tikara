@@ -10,10 +10,12 @@ from tikara.data_types import (
     TikaUnpackedItem,
     TikaUnpackResult,
 )
+from tikara.error_handling import TikaError
 
 __all__ = [
     "Tika",
     "TikaDetectLanguageResult",
+    "TikaError",
     "TikaInputType",
     "TikaLanguageConfidence",
     "TikaMetadata",
