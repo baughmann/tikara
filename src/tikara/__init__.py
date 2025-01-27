@@ -8,6 +8,7 @@ from tikara.data_types import (
     TikaMetadata,
     TikaParseOutputFormat,
     TikaUnpackedItem,
+    TikaUnpackResult,
 )
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "TikaLanguageConfidence",
     "TikaMetadata",
     "TikaParseOutputFormat",
+    "TikaUnpackResult",
     "TikaUnpackedItem",
 ]

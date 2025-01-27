@@ -12,6 +12,7 @@ from tikara.data_types import (
     TikaLanguageConfidence,
     TikaMetadata,
     TikaParseOutputFormat,
+    TikaUnpackResult,
 )
 from tikara.util.java import (
     _is_binary_io,
@@ -20,7 +21,6 @@ from tikara.util.java import (
 )
 from tikara.util.misc import _validate_and_prepare_output_file
 from tikara.util.tika import (
-    TikaUnpackedItem,
     _get_metadata,
     _handle_file_output,
     _handle_stream_output,
@@ -303,6 +303,24 @@ class Tika:
             raw_score=float(result.getRawScore()),
         )
 
+    @staticmethod
+    def _determine_root_file_output_path(
+        obj: TikaInputType,
+        input_file_name: str | Path | None,
+        output_dir: Path,
+        root_file_metadata: TikaMetadata,
+    ) -> Path:
+        if isinstance(obj, str | Path):
+            return Path(obj)
+        if input_file_name:
+            return Path(output_dir, Path(input_file_name).name)
+        if root_file_metadata.resource_name:
+            return Path(output_dir, Path(root_file_metadata.resource_name).name)
+        if root_file_metadata.resource_path:
+            return Path(output_dir, Path(root_file_metadata.resource_path).name)
+
+        return Path(output_dir, "root_input_file")
+
     def unpack(
         self,
         obj: TikaInputType,
@@ -311,7 +329,7 @@ class Tika:
         max_depth: int = 1,
         input_file_name: str | Path | None = None,
         content_type: str | None = None,
-    ) -> list[TikaUnpackedItem]:
+    ) -> TikaUnpackResult:
         """Extract embedded documents from a container document recursively.
 
         Extracts and saves embedded documents (e.g. images in PDFs, files in Office documents) to disk.
@@ -326,13 +344,14 @@ class Tika:
             max_depth: Maximum recursion depth for nested containers. Default 1 extracts only
                 top-level embedded docs.
             input_file_name: Original filename if obj is bytes/stream. Helps with metadata
-                extraction.
+                extraction and also helps name the output of the root file in the output_dir. Only necessary
+                if obj is bytes or stream.
             content_type: MIME type of input if known. Helps with metadata extraction.
 
         Returns:
-            List[TikaUnpackedItem], each containing:
-                file_path: Path where extracted doc was saved
-                metadata: Dict of metadata about extracted doc
+            TikaUnpackResult with fields:
+                root_metadata: Metadata of the root document
+                embedded_documents: List of TikaUnpackedItem objects representing extracted files
 
         Raises:
             FileNotFoundError: If input file path doesn't exist
@@ -340,7 +359,7 @@ class Tika:
             RuntimeError: If extraction fails
 
         Examples:
-            Basic extraction::
+            ::
 
                 tika = Tika()
                 items = tika.unpack("presentation.pptx", Path("extracted/"))
@@ -348,13 +367,6 @@ class Tika:
                     print(f"Found {item.metadata['Content-Type']} at {item.file_path}")
                 Found image/png at extracted/image1.png
                 Found application/pdf at extracted/embedded.pdf
-
-            Recursive extraction::
-
-                tika.unpack("container.docx", Path("out/"), max_depth=3)
-                [TikaUnpackedItem(file_path='out/image1.emf', metadata={...}),
-                TikaUnpackedItem(file_path='out/report.pdf', metadata={...}),
-                TikaUnpackedItem(file_path='out/report/chart.png', metadata={...})]
 
         Notes:
             - Creates output_dir if it doesn't exist
@@ -378,7 +390,7 @@ class Tika:
         from org.xml.sax import ContentHandler
         from org.xml.sax.helpers import DefaultHandler
 
-        metadata = _get_metadata(obj=obj, input_file_name=input_file_name, content_type=content_type)
+        tika_metadata = _get_metadata(obj=obj, input_file_name=input_file_name, content_type=content_type)
 
         ch = DefaultHandler()
         pc = ParseContext()
@@ -400,14 +412,17 @@ class Tika:
         )
 
         try:
-            with _tika_input_stream(obj, metadata=metadata) as input_stream:
-                self._parser.parse(input_stream, ch, metadata, pc)
+            with _tika_input_stream(obj, metadata=tika_metadata) as input_stream:
+                self._parser.parse(input_stream, ch, tika_metadata, pc)
 
-                return extractor.get_results()
+                return TikaUnpackResult(
+                    root_metadata=TikaMetadata._from_java_metadata(tika_metadata),
+                    embedded_documents=extractor.get_results(),
+                )
+
         except JException as e:
             if isinstance(e, NoSuchFileException | NotDirectoryException):
                 raise FileNotFoundError(e.getMessage()) from e
-
             raise
 
     @overload

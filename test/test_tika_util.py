@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from tikara.data_types import TikaLanguageConfidence, TikaMetadata, TikaUnpackedItem
+from tikara.data_types import TikaLanguageConfidence, TikaMetadata
 from tikara.util.tika import (
     _RecursiveEmbeddedDocumentExtractor,
     _tika_input_stream,
@@ -33,16 +33,6 @@ def sample_metadata() -> "Metadata":
 def test_metadata_to_dict(sample_metadata: "Metadata") -> None:
     result = TikaMetadata._metadata_to_dict(sample_metadata)
     assert result == {"key1": "value1", "key2": "value2"}
-
-
-def test_tikara_unpacked_item() -> None:
-    item = TikaUnpackedItem(metadata={"key": "value"}, file_path=Path("/test/path"))
-    assert item.metadata == {"key": "value"}
-    assert item.file_path == Path("/test/path")
-
-    # Test immutability
-    with pytest.raises(AttributeError):
-        item.metadata = {}  # type: ignore  # noqa: PGH003
 
 
 def test_language_confidence_enum() -> None:

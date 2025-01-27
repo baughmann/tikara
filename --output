@@ -45,7 +45,7 @@
                             <h5 class="mb-2">Meta-data</h5>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p class="my-1"><span class="fw-bold">Time</span>: 2025-01-26 16:29:40.752031</p>
+                                    <p class="my-1"><span class="fw-bold">Time</span>: 2025-01-26 19:42:51.862791</p>
                                     <p class="my-1"><span class="fw-bold">Safety version</span>: 3.2.9</p>
                                     <p class="my-1">
                                         
@@ -245,6 +245,17 @@
                                                 <ul>
                                                     
                                                     <li>httptools==0.6.4</li>
+                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    
+                                        <tr>
+                                            <td>tikara</td>
+                                            <td>
+                                                <ul>
+                                                    
+                                                    <li>tikara==0.1.5.post1.dev1+gec60e11.d20250127</li>
                                                     
                                                 </ul>
                                             </td>
@@ -1400,17 +1411,6 @@
                                                 <ul>
                                                     
                                                     <li>coverage==7.6.10</li>
-                                                    
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    
-                                        <tr>
-                                            <td>tikara</td>
-                                            <td>
-                                                <ul>
-                                                    
-                                                    <li>tikara==0.1.4.post1.dev7+g3fdf446.d20250126</li>
                                                     
                                                 </ul>
                                             </td>

@@ -1,7 +1,6 @@
 """Common data types used in public methods and classes."""
 
 import logging
-from dataclasses import dataclass
 from enum import StrEnum, unique
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Self
@@ -16,14 +15,6 @@ TikaParseOutputFormat = Literal["txt", "xhtml"]
 TikaInputType = str | Path | bytes | BinaryIO
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True, kw_only=True)
-class TikaUnpackedItem:
-    """Represents an unpacked embedded document."""
-
-    metadata: dict[str, str]
-    file_path: Path
 
 
 @unique
@@ -79,7 +70,7 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         "image_count": [Office.IMAGE_COUNT],
         "hidden_slides": [OfficeOpenXMLExtended.HIDDEN_SLIDES],
         # Resource Information
-        "resource_name": [TikaCoreProperties.RESOURCE_NAME_KEY],
+        "resource_name": [TikaCoreProperties.RESOURCE_NAME_KEY, "File Name"],
         "embedded_resource_path": [TikaCoreProperties.EMBEDDED_RESOURCE_PATH],
         "embedded_resource_type": [TikaCoreProperties.EMBEDDED_RESOURCE_TYPE],
         "embedded_relationship_id": [TikaCoreProperties.EMBEDDED_RELATIONSHIP_ID],
@@ -137,7 +128,6 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         "audio_encoding": ["encoding"],
         "audio_duration": [XMPDM.DURATION],
         "audio_compression": [XMPDM.AUDIO_COMPRESSOR],
-        "file_name": ["File Name"],
         "embed_depth": [TikaCoreProperties.EMBEDDED_DEPTH],
         # Message Information
         "from": [Message.MESSAGE_FROM, Message.MESSAGE_FROM_EMAIL, Message.MESSAGE_FROM_NAME],
@@ -260,7 +250,6 @@ class TikaMetadata(BaseModel):
     audio_encoding: str | None = Field(default=None, description="The audio encoding type")
     audio_duration: float | None = Field(default=None, description="The audio duration in seconds")
     audio_compression: str | None = Field(default=None, description="The audio compression type")
-    file_name: str | None = Field(default=None, description="The name of the file")
 
     # Message Information
     from_: str | None = Field(alias="from", default=None, description="The sender of the message")
@@ -336,3 +325,17 @@ class TikaMetadata(BaseModel):
     @staticmethod
     def _metadata_to_dict(metadata: "Metadata") -> dict[str, Any]:
         return {str(key): str(metadata.get(key)) for key in metadata.names()}
+
+
+class TikaUnpackedItem(BaseModel):
+    """Individual unpacked embedded document."""
+
+    metadata: TikaMetadata = Field(description="The metadata of the unpacked document")
+    file_path: Path = Field(description="The path to the unpacked file in the output directory")
+
+
+class TikaUnpackResult(BaseModel):
+    """Result of unpacking a document with embedded files."""
+
+    root_metadata: TikaMetadata = Field(description="The metadata of the root input document")
+    embedded_documents: list[TikaUnpackedItem] = Field(default_factory=list)

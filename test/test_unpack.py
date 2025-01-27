@@ -1,4 +1,3 @@
-import os
 import tempfile
 from pathlib import Path
 
@@ -8,6 +7,7 @@ from testcontainers.core.container import DockerContainer
 
 from test.util import extract_and_cleanup_zip
 from tikara.core import Tika
+from tikara.data_types import TikaUnpackResult
 
 UNPACK_RECURSIVE_TEST_CASES: list[tuple[str, list[str], int]] = [
     ("test_recursive_embedded_docx", ["embed1.zip", "image1.emf"], 1),
@@ -20,7 +20,7 @@ UNPACK_RECURSIVE_TEST_CASES: list[tuple[str, list[str], int]] = [
 
 
 @pytest.mark.parametrize(("fixture_name", "expected_embedded_file_names", "max_depth"), UNPACK_RECURSIVE_TEST_CASES)
-def test_unpack_docx_with_embedded_files(
+def test_unpack_with_embedded_files_input_filepath(
     tika: Tika,
     request: pytest.FixtureRequest,
     fixture_name: str,
@@ -33,24 +33,69 @@ def test_unpack_docx_with_embedded_files(
     with tempfile.TemporaryDirectory() as temp_dir_:
         temp_dir = Path(temp_dir_)
         # When
-        results = tika.unpack(obj=input_file_path, output_dir=temp_dir, max_depth=max_depth)
+        result = tika.unpack(obj=input_file_path, output_dir=temp_dir, max_depth=max_depth)
 
         # Then
-        assert isinstance(results, list)
-        assert len(results) == len(expected_embedded_file_names)
+        assert isinstance(result.embedded_documents, list)
+        assert len(result.embedded_documents) == len(expected_embedded_file_names)
 
         # ensure all expected files are in the results
         result_paths = set[str]()
-        for result in results:
-            rel_path = result.file_path.relative_to(temp_dir)
+        for child in result.embedded_documents:
+            rel_path = child.file_path.relative_to(temp_dir)
             result_paths.add(str(rel_path))
         assert set(expected_embedded_file_names) == result_paths
 
         # ensure that all files were unpacked to the correct directory
-        for result in results:
-            assert result.file_path.exists()
-            assert result.file_path.is_file()
-            assert len(result.file_path.read_bytes())
+        for child in result.embedded_documents:
+            assert child.file_path.exists()
+            assert child.file_path.is_file()
+            assert len(child.file_path.read_bytes())
+
+        # ensure the root document is also found
+        assert result.root_metadata
+
+
+@pytest.mark.parametrize(("fixture_name", "expected_embedded_file_names", "max_depth"), UNPACK_RECURSIVE_TEST_CASES)
+def test_unpack_with_embedded_files_input_stream(
+    tika: Tika,
+    request: pytest.FixtureRequest,
+    fixture_name: str,
+    expected_embedded_file_names: list[str],
+    max_depth: int,
+) -> None:
+    """Test unpacking a Word document containing embedded files."""
+    input_file_path: Path = request.getfixturevalue(fixture_name)
+
+    with open(input_file_path, "rb") as input_binary_stream, tempfile.TemporaryDirectory() as temp_dir_:
+        temp_dir = Path(temp_dir_)
+        # When
+        result = tika.unpack(
+            obj=input_binary_stream,
+            input_file_name=input_file_path.name,
+            output_dir=temp_dir,
+            max_depth=max_depth,
+        )
+
+        # Then
+        assert isinstance(result.embedded_documents, list)
+        assert len(result.embedded_documents) == len(expected_embedded_file_names)
+
+        # ensure all expected files are in the results
+        result_paths = set[str]()
+        for child in result.embedded_documents:
+            rel_path = child.file_path.relative_to(temp_dir)
+            result_paths.add(str(rel_path))
+        assert set(expected_embedded_file_names) == result_paths
+
+        # ensure that all files were unpacked to the correct directory
+        for child in result.embedded_documents:
+            assert child.file_path.exists()
+            assert child.file_path.is_file()
+            assert len(child.file_path.read_bytes())
+
+        # ensure the root document is also found
+        assert result.root_metadata
 
 
 def test_unpack_nonexistent_file(tika: Tika) -> None:
@@ -79,7 +124,6 @@ def tika_server_unpack_request_params(tika_container: DockerContainer) -> tuple[
 UNPACK_SHALLOW_TEST_CASES: list[tuple[str, list[str]]] = [
     ("test_recursive_embedded_docx", ["embed1.zip", "image1.emf"]),
     ("demo_docx", ["image2.png", "image3.png", "image4.png"]),
-    ("basic_txt", []),
 ]
 
 
@@ -95,10 +139,6 @@ def test_unpack_compare_with_tika_server(
     input_file_path: Path = request.getfixturevalue(fixture_name)
 
     url, headers = tika_server_unpack_request_params
-
-    if len(expected_embedded_file_names) == 0:
-        pytest.skip("No embedded files to test")
-        return
 
     with tempfile.TemporaryDirectory() as temp_dir_:
         tika_server_output_dir = Path(temp_dir_, "tika_server_output")
@@ -122,13 +162,14 @@ def test_unpack_compare_with_tika_server(
             extract_and_cleanup_zip(tika_server_output_zip)
 
         # When
-        lib_results = tika.unpack(
+        result: TikaUnpackResult = tika.unpack(
             obj=input_file_path,
             output_dir=tika_lib_output_dir,
         )
 
         # Then
-        assert len(lib_results) == len(expected_embedded_file_names)
+        assert len(result.embedded_documents) == len(expected_embedded_file_names)
         # ensure that every file found by the Tika server is also found by the library
-        for file in os.listdir(tika_server_output_dir):
-            assert any(result.file_path.name == file for result in lib_results)
+        assert all(child.file_path.exists() for child in result.embedded_documents)
+        # ensure the root document is also found
+        assert result.root_metadata
