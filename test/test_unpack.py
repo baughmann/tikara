@@ -8,6 +8,7 @@ from testcontainers.core.container import DockerContainer
 from test.util import extract_and_cleanup_zip
 from tikara.core import Tika
 from tikara.data_types import TikaUnpackResult
+from tikara.error_handling import TikaError
 
 UNPACK_RECURSIVE_TEST_CASES: list[tuple[str, list[str], int]] = [
     ("test_recursive_embedded_docx", ["embed1.zip", "image1.emf"], 1),
@@ -106,7 +107,7 @@ def test_unpack_nonexistent_file(tika: Tika) -> None:
         invalid_file = temp_dir / "invalid_file"
 
         # When/Then
-        with pytest.raises(FileNotFoundError, match=str(invalid_file)):
+        with pytest.raises(TikaError, match=str(invalid_file)):
             tika.unpack(invalid_file, output_dir=temp_dir)
 
 

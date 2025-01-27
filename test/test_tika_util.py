@@ -6,6 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from tikara.data_types import TikaLanguageConfidence, TikaMetadata
+from tikara.error_handling import TikaInputTypeError
 from tikara.util.tika import (
     _RecursiveEmbeddedDocumentExtractor,
     _tika_input_stream,
@@ -73,7 +74,7 @@ def test_tika_input_stream_with_binary_io() -> None:
 
 
 def test_tika_input_stream_invalid_input() -> None:
-    with pytest.raises(TypeError), _tika_input_stream(123):  # type: ignore  # noqa: PGH003
+    with pytest.raises(TikaInputTypeError), _tika_input_stream(123):  # type: ignore  # noqa: PGH003
         pass
 
 

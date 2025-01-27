@@ -4,7 +4,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO, Literal, overload
 
-from jpype import JException, JProxy
+from jpype import JProxy
 
 from tikara.data_types import (
     TikaDetectLanguageResult,
@@ -13,6 +13,14 @@ from tikara.data_types import (
     TikaMetadata,
     TikaParseOutputFormat,
     TikaUnpackResult,
+)
+from tikara.error_handling import (
+    TikaInputArgumentsError,
+    TikaInputFileNotFoundError,
+    TikaInputTypeError,
+    TikaMimeTypeError,
+    TikaOutputModeError,
+    wrap_exceptions,
 )
 from tikara.util.java import (
     _is_binary_io,
@@ -37,11 +45,13 @@ if TYPE_CHECKING:
 class Tika:
     """The main entrypoint class. Wraps management of the underlying Tika and JVM instances."""
 
+    @wrap_exceptions
     def _ensure_language_models_loaded(self) -> None:
         if not self._models_loaded:
             self._language_detector.loadModels()
             self._models_loaded = True
 
+    @wrap_exceptions
     def __init__(  # noqa: PLR0913
         self,
         *,
@@ -133,9 +143,8 @@ class Tika:
             try:
                 root_type, sub_type = custom_mime_type.split("/")
                 self._media_type_registry.addType(MediaType(root_type, sub_type))
-            except ValueError:
-                msg = f"Invalid custom MIME type: {custom_mime_type}. Type must be in the form 'type/subtype', like 'text/plain'."  # noqa: E501
-                raise ValueError(msg) from None
+            except ValueError as e:
+                raise TikaMimeTypeError._from_mimetype(custom_mime_type) from e
 
         # important that default detector is last in the list so that custom detectors are checked first
         self._detector: Detector = (
@@ -155,6 +164,7 @@ class Tika:
     #
     # MimeType detection
     #
+    @wrap_exceptions
     def detect_mime_type(self, obj: TikaInputType) -> str:
         """Detect the MIME type of a file, bytes, or stream.
 
@@ -217,12 +227,10 @@ class Tika:
         elif _is_binary_io(obj):
             input_stream = _wrap_python_stream(obj)
         else:
-            msg = f"Unsupported input type: {type(obj)}"
-            raise TypeError(msg)
+            raise TikaInputTypeError._from_input_type(type(obj))
 
         if input_file and not input_file.exists():
-            msg = f"File not found: {input_file}"
-            raise FileNotFoundError(msg)
+            raise TikaInputFileNotFoundError._from_file(input_file)
 
         try:
             if input_stream:
@@ -231,7 +239,7 @@ class Tika:
                 java_path = JPath.of(str(input_file))
                 return str(self._tika.detect(java_path))
             msg = "Unsupported input type"
-            raise ValueError(msg)
+            raise TikaInputArgumentsError from ValueError(msg)
         finally:
             if isinstance(input_stream, InputStream):
                 input_stream.close()
@@ -239,6 +247,7 @@ class Tika:
     #
     # Language detection
     #
+    @wrap_exceptions
     def detect_language(
         self,
         content: str,
@@ -321,6 +330,7 @@ class Tika:
 
         return Path(output_dir, "root_input_file")
 
+    @wrap_exceptions
     def unpack(
         self,
         obj: TikaInputType,
@@ -384,7 +394,6 @@ class Tika:
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
-        from java.nio.file import NoSuchFileException, NotDirectoryException
         from org.apache.tika.extractor import EmbeddedDocumentExtractor
         from org.apache.tika.parser import ParseContext, Parser
         from org.xml.sax import ContentHandler
@@ -411,19 +420,13 @@ class Tika:
             ),
         )
 
-        try:
-            with _tika_input_stream(obj, metadata=tika_metadata) as input_stream:
-                self._parser.parse(input_stream, ch, tika_metadata, pc)
+        with _tika_input_stream(obj, metadata=tika_metadata) as input_stream:
+            self._parser.parse(input_stream, ch, tika_metadata, pc)
 
-                return TikaUnpackResult(
-                    root_metadata=TikaMetadata._from_java_metadata(tika_metadata),
-                    embedded_documents=extractor.get_results(),
-                )
-
-        except JException as e:
-            if isinstance(e, NoSuchFileException | NotDirectoryException):
-                raise FileNotFoundError(e.getMessage()) from e
-            raise
+            return TikaUnpackResult(
+                root_metadata=TikaMetadata._from_java_metadata(tika_metadata),
+                embedded_documents=extractor.get_results(),
+            )
 
     @overload
     def parse(
@@ -523,6 +526,7 @@ class Tika:
         """
         ...
 
+    @wrap_exceptions
     def parse(  # noqa: PLR0913
         self,
         obj: TikaInputType,
@@ -621,7 +625,7 @@ class Tika:
         output_file = _validate_and_prepare_output_file(output_file=output_file, output_format=output_format)
         if output_mode == "file" and not output_file:
             msg = "output_file is required when mode is 'file'"
-            raise ValueError(msg)
+            raise TikaInputArgumentsError(msg)
 
         # Create initial metadata
         metadata = _get_metadata(
@@ -636,7 +640,7 @@ class Tika:
                 case "file":
                     if not output_file:
                         msg = "output_file is required when mode is 'file'"
-                        raise ValueError(msg)
+                        raise TikaInputArgumentsError(msg)
                     return _handle_file_output(
                         parser=self._parser,
                         output_file=output_file,
@@ -659,5 +663,4 @@ class Tika:
                         output_format=output_format,
                     )
                 case _:
-                    msg = f"Unsupported mode: {output_mode}"
-                    raise ValueError(msg)
+                    raise TikaOutputModeError._from_output_mode(output_mode)

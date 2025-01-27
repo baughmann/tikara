@@ -21,6 +21,6 @@ docs:
 	@uv run sphinx-build -b html docs/source/ docs/build/html
 
 
-prepush: ruff test_coverage safety
+prepush: ruff test_coverage safety --save-as html --output safety.html
 
 .PHONY: stubs ruff test test_coverage safety docs prepush

@@ -1,5 +1,6 @@
 """Common data types used in public methods and classes."""
 
+import contextlib
 import logging
 from enum import StrEnum, unique
 from pathlib import Path
@@ -41,8 +42,10 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         PDF,
         TIFF,
         XMPDM,
+        XMPMM,
         DublinCore,
         Epub,
+        FileSystem,
         Message,
         Metadata,
         Office,
@@ -55,7 +58,19 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
     return {
         # Processing Metadata
         "parse_time_millis": [TikaCoreProperties.PARSE_TIME_MILLIS],
-        "encoding": [Metadata.CONTENT_ENCODING, TikaCoreProperties.DETECTED_ENCODING],
+        "encoding": [
+            Metadata.CONTENT_ENCODING,
+            TikaCoreProperties.DETECTED_ENCODING,
+            "Encoding",
+            "encoding",
+            "charset",
+        ],
+        "compression": [
+            "Compression CompressionTypeName",
+            "Compression",
+            XMPDM.AUDIO_COMPRESSOR,
+            XMPDM.VIDEO_COMPRESSOR,
+        ],
         # Document Counts
         "paragraph_count": [Office.PARAGRAPH_COUNT],
         "revision": [OfficeOpenXMLCore.REVISION],
@@ -76,8 +91,16 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         "embedded_relationship_id": [TikaCoreProperties.EMBEDDED_RELATIONSHIP_ID],
         "embedded_depth": [TikaCoreProperties.EMBEDDED_DEPTH],
         # Dates
-        "created": [DublinCore.CREATED, PDF.DOC_INFO_CREATED],
-        "modified": [DublinCore.MODIFIED, PDF.DOC_INFO_MODIFICATION_DATE],
+        "created": [DublinCore.CREATED, PDF.DOC_INFO_CREATED, FileSystem.CREATED],
+        "modified": [
+            DublinCore.MODIFIED,
+            PDF.DOC_INFO_MODIFICATION_DATE,
+            FileSystem.MODIFIED,
+            FileSystem.CREATED,
+            "File Modification Date/Time",
+            "File Inode Change Date/Time",
+        ],
+        "accessed": [DublinCore.DATE, FileSystem.ACCESSED, "File Access Date/Time"],
         # Content Information
         "content_type": [Metadata.CONTENT_TYPE],
         "content_type_override": [TikaCoreProperties.CONTENT_TYPE_USER_OVERRIDE],
@@ -97,8 +120,15 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         "language": [DublinCore.LANGUAGE],
         # Application Metadata
         "identifier": [DublinCore.IDENTIFIER],
-        "application": [OfficeOpenXMLExtended.APPLICATION, PDF.DOC_INFO_CREATOR_TOOL],
-        "application_version": [OfficeOpenXMLExtended.APP_VERSION],
+        "application": [
+            OfficeOpenXMLExtended.APPLICATION,
+            PDF.DOC_INFO_CREATOR_TOOL,
+            TIFF.SOFTWARE,
+            XMPMM.HISTORY_SOFTWARE_AGENT,
+            "Software",
+            "vendor",
+        ],
+        "application_version": [OfficeOpenXMLExtended.APP_VERSION, "version"],
         "producer": [PDF.PRODUCER],
         "version": [PDF.PDF_VERSION, Epub.VERSION],
         "template": [OfficeOpenXMLExtended.TEMPLATE],
@@ -114,21 +144,25 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
             OfficeOpenXMLExtended.DOC_SECURITY,
             OfficeOpenXMLExtended.DOC_SECURITY_STRING,
         ],
+        # Multimedia Metadata
+        # Generic Multimedia
+        "height": ["height", "Image Height", TIFF.IMAGE_LENGTH],
+        "width": ["width", "Image Width", TIFF.IMAGE_WIDTH],
+        "duration": [XMPDM.DURATION, "Duration"],
+        "stream_count": ["Stream Count"],
         # Image Metadata
-        "height": ["height"],
-        "width": ["width"],
-        "pixel_aspect_ratio": [XMPDM.VIDEO_PIXEL_ASPECT_RATIO],
-        "compression_type": ["Compression CompressionTypeName"],
-        "color_space": [XMPDM.VIDEO_COLOR_SPACE],
+        "image_pixel_aspect_ratio": [XMPDM.VIDEO_PIXEL_ASPECT_RATIO],
+        "image_color_space": [XMPDM.VIDEO_COLOR_SPACE],
         # Audio Metadata
-        "audio_sample_rate": [XMPDM.AUDIO_SAMPLE_RATE],
-        "audio_channels": [XMPDM.AUDIO_CHANNEL_TYPE],
+        "audio_channels": [XMPDM.AUDIO_CHANNEL_TYPE, "channels"],
         "audio_bits": ["bits"],
         "audio_sample_type": [XMPDM.AUDIO_SAMPLE_TYPE],
-        "audio_encoding": ["encoding"],
-        "audio_duration": [XMPDM.DURATION],
-        "audio_compression": [XMPDM.AUDIO_COMPRESSOR],
-        "embed_depth": [TikaCoreProperties.EMBEDDED_DEPTH],
+        "audio_sample_rate": [XMPDM.AUDIO_SAMPLE_RATE, "Audio Sample Rate", "Sample Rate", "samplerate"],
+        # Video Metadata
+        "video_frame_rate": [XMPDM.VIDEO_FRAME_RATE],
+        "video_codec": ["Video Codec"],
+        "video_frame_count": ["Frame Count"],
+        "video_sample_rate": ["Sample Rate"],
         # Message Information
         "from": [Message.MESSAGE_FROM, Message.MESSAGE_FROM_EMAIL, Message.MESSAGE_FROM_NAME],
         "to": [
@@ -160,6 +194,7 @@ class TikaMetadata(BaseModel):
 
     # Processing Metadata
     encoding: str | None = Field(default=None, description="The detected encoding of the document")
+    compression: str | None = Field(default=None, description="The compression type")
 
     # Document Counts
     paragraph_count: int | None = Field(default=None, description="The number of paragraphs in the document")
@@ -225,7 +260,9 @@ class TikaMetadata(BaseModel):
     # Application Metadata
     identifier: str | None = Field(default=None, description="The identifier of the document, Unknown.")
     application: str | None = Field(default=None, description="The application that created the document")
-    application_version: str | None = Field(default=None, description="The version of the application")
+    application_version: str | None = Field(
+        default=None, description="The version of the application. Sometimes contains the application name."
+    )
     producer: str | None = Field(default=None, description="The producer of the document. Unknown.")
     version: str | None = Field(default=None, description="The version of the document")
     template: str | None = Field(
@@ -235,21 +272,27 @@ class TikaMetadata(BaseModel):
     security: str | None = Field(default=None, description="The security status of the document")
     is_encrypted: bool | str | None = Field(default=None, description="Whether the document is encrypted")
 
+    # Multimedia Metadata
+    # Generic Multimedia
+    height: int | str | None = Field(default=None, description="The height of the image in pixels")
+    width: int | str | None = Field(default=None, description="The width of the image in pixels")
+    duration: float | str | None = Field(default=None, description="The duration of the video in seconds")
+    sample_rate: int | str | None = Field(default=None, description="The sample rate")
+    stream_count: int | str | None = Field(default=None, description="The number of streams in the document")
     # Image Metadata
-    height: int | None = Field(default=None, description="The height of the image in pixels")
-    width: int | None = Field(default=None, description="The width of the image in pixels")
-    pixel_aspect_ratio: float | None = Field(default=None, description="The pixel aspect ratio of the image")
-    compression_type: str | None = Field(default=None, description="The compression type of the image")
-    color_space: str | None = Field(default=None, description="The color space of the image")
-
+    image_pixel_aspect_ratio: float | str | None = Field(
+        default=None, description="The pixel aspect ratio of the image"
+    )
+    image_color_space: str | None = Field(default=None, description="The color space of the image")
     # Audio Metadata
-    audio_sample_rate: int | None = Field(default=None, description="The audio sample rate")
-    audio_channels: int | None = Field(default=None, description="The number of audio channels")
-    audio_bits: int | None = Field(default=None, description="The number of bits in the audio")
+    audio_channels: int | str | None = Field(default=None, description="The number of audio channels")
+    audio_bits: int | str | None = Field(default=None, description="The number of bits in the audio")
     audio_sample_type: str | None = Field(default=None, description="The audio sample type")
     audio_encoding: str | None = Field(default=None, description="The audio encoding type")
-    audio_duration: float | None = Field(default=None, description="The audio duration in seconds")
-    audio_compression: str | None = Field(default=None, description="The audio compression type")
+    # Video Metadata
+    video_frame_rate: float | str | None = Field(default=None, description="The video frame rate")
+    video_codec: str | None = Field(default=None, description="The video codec")
+    video_frame_count: int | str | None = Field(default=None, description="The number of frames in the video")
 
     # Message Information
     from_: str | None = Field(alias="from", default=None, description="The sender of the message")
@@ -285,34 +328,32 @@ class TikaMetadata(BaseModel):
                         if field_name in cls.__annotations__:
                             field_type = cls.__annotations__[field_name]
                             if "int" in str(field_type) and value:
-                                try:
+                                with contextlib.suppress(ValueError, TypeError):
                                     value = int(value)
-                                except (ValueError, TypeError):
-                                    continue
                             elif "float" in str(field_type) and value:
-                                try:
+                                with contextlib.suppress(ValueError, TypeError):
                                     value = float(value)
-                                except (ValueError, TypeError):
-                                    continue
                             elif "list[int]" in str(field_type) and value:
-                                try:
+                                with contextlib.suppress(ValueError, TypeError):
                                     if isinstance(value, str):
                                         value = [int(x) for x in value.split(",")]
                                     elif isinstance(value, list | tuple):
                                         value = [int(x) for x in value]
-                                except (ValueError, TypeError):
-                                    continue
+
                             elif "list[str]" in str(field_type) and value:
-                                try:
+                                with contextlib.suppress(ValueError, TypeError):
                                     if isinstance(value, str):
                                         value = value.split(",")
                                         value = [x.strip() for x in value]
                                     elif isinstance(value, list | tuple):
                                         value = [str(x) for x in value]
-                                except (ValueError, TypeError):
-                                    continue
                             else:
-                                value = str(value)
+                                # fallback to string if unable to convert to a more specific type
+                                with contextlib.suppress(ValueError, TypeError):
+                                    value = str(value)
+
+                        if not value:
+                            logger.warning(f"Unable to decode value for {field_name}. Skipping.")
 
                         data[field_name] = value or None
                         break  # Use first matching value

@@ -3,6 +3,8 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from tikara.error_handling import TikaInputFileNotFoundError
+
 if TYPE_CHECKING:
     from tikara.data_types import TikaParseOutputFormat
 
@@ -27,6 +29,5 @@ def _validate_input_file(input_file: Path | str) -> Path:
     if isinstance(input_file, str):
         input_file = Path(input_file)
     if not input_file.exists():
-        msg = f"File not found: {input_file}"
-        raise FileNotFoundError(msg)
+        raise TikaInputFileNotFoundError._from_file(input_file)
     return input_file
