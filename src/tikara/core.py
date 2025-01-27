@@ -38,7 +38,11 @@ from tikara.util.tika import (
 )
 
 if TYPE_CHECKING:
+    from org.apache.tika import Tika as JTika
+    from org.apache.tika.config import TikaConfig as JTikaConfig
     from org.apache.tika.detect import Detector
+    from org.apache.tika.language.detect import LanguageDetector
+    from org.apache.tika.mime import MediaTypeRegistry
     from org.apache.tika.parser import Parser
 
 
@@ -46,10 +50,102 @@ class Tika:
     """The main entrypoint class. Wraps management of the underlying Tika and JVM instances."""
 
     @wrap_exceptions
-    def _ensure_language_models_loaded(self) -> None:
-        if not self._models_loaded:
-            self._language_detector.loadModels()
-            self._models_loaded = True
+    def _get_configuration(self) -> "JTikaConfig":
+        if self._j_tika_config:
+            return self._j_tika_config
+
+        from org.apache.tika.config import TikaConfig as JTikaConfig
+
+        self._j_tika_config = JTikaConfig.getDefaultConfig()
+
+        return self._j_tika_config
+
+    @wrap_exceptions
+    def _get_mime_type_registry(self) -> "MediaTypeRegistry":
+        if self._media_type_registry:
+            return self._media_type_registry
+
+        config = self._get_configuration()
+
+        self._media_type_registry = config.getMediaTypeRegistry()
+
+        from org.apache.tika.mime import MediaType
+
+        # if user has custom mime types, add them to the media type registry and validate them
+        for custom_mime_type in self._custom_mime_types or []:
+            try:
+                root_type, sub_type = custom_mime_type.split("/")
+                self._media_type_registry.addType(MediaType(root_type, sub_type))
+            except ValueError as e:
+                raise TikaMimeTypeError._from_mimetype(custom_mime_type) from e
+        return config.getMediaTypeRegistry()
+
+    @wrap_exceptions
+    def _get_language_detector(self) -> "LanguageDetector":
+        if self._language_detector:
+            return self._language_detector
+
+        from org.apache.tika.language.detect import LanguageDetector
+
+        self._language_detector = LanguageDetector.getDefaultLanguageDetector()
+        self._language_detector.loadModels()
+        return self._language_detector
+
+    @wrap_exceptions
+    def _get_detector(self) -> "Detector":
+        if self._detector:
+            return self._detector
+
+        custom_detectors = (
+            self._custom_detectors() if callable(self._custom_detectors) else self._custom_detectors or []
+        )
+
+        from java.util import ArrayList as JArrayList
+        from org.apache.tika.detect import CompositeDetector, DefaultDetector
+
+        if not custom_detectors:
+            self._detector = DefaultDetector()
+        else:
+            media_type_registry = self._get_mime_type_registry()
+            self._detector = CompositeDetector(
+                media_type_registry,
+                JArrayList(
+                    [
+                        *custom_detectors,
+                        DefaultDetector(),
+                    ]
+                ),
+            )
+        return self._detector
+
+    @wrap_exceptions
+    def _get_parser(self) -> "Parser":
+        if self._parser:
+            return self._parser
+
+        custom_parsers = self._custom_parsers() if callable(self._custom_parsers) else self._custom_parsers or []
+
+        from org.apache.tika.parser import AutoDetectParser, DefaultParser
+
+        detector = self._get_detector()
+
+        self._parser = AutoDetectParser(detector, DefaultParser(), *custom_parsers)
+
+        return self._parser
+
+    @wrap_exceptions
+    def _get_tika(self) -> "JTika":
+        if self._tika:
+            return self._tika
+
+        detector = self._get_detector()
+        parser = self._get_parser()
+
+        from org.apache.tika import Tika as JTika
+
+        self._tika = JTika(detector, parser)
+
+        return self._tika
 
     @wrap_exceptions
     def __init__(  # noqa: PLR0913
@@ -68,8 +164,9 @@ class Tika:
         It manages JVM initialization and Tika configuration including custom parsers, detectors and MIME types.
 
         Args:
-            lazy_load: Whether to defer loading language detection models until first use. Defaults to True.
-                Setting to False loads models immediately but increases startup time.
+            lazy_load: Whether to load the JVM, Tika classes and language models lazily on first use. Defaults to True.
+                If False, the JVM is initialized immediately. This can improve startup time for small tasks.
+                Note that the JVM is always shut down when the Tika instance is deleted.
             custom_parsers: Custom parsers to add to the Tika pipeline. Can be either a list of Parser instances
                 or a callable that returns such a list. Defaults to None.
             custom_detectors: Custom detectors to add to the Tika pipeline. Can be either a list of Detector instances
@@ -123,43 +220,20 @@ class Tika:
         """  # noqa: E501
         initialize_jvm(tika_jar_override=tika_jar_override, extra_jars=extra_jars)
 
-        custom_detectors = custom_detectors() if callable(custom_detectors) else custom_detectors or []
-        custom_parsers = custom_parsers() if callable(custom_parsers) else custom_parsers or []
-        custom_mime_types = custom_mime_types or []
+        self._custom_mime_types: list[str] | None = custom_mime_types
+        self._custom_parsers = custom_parsers
+        self._custom_detectors = custom_detectors
 
-        from java.util import ArrayList as JArrayList
-        from org.apache.tika import Tika as JTika
-        from org.apache.tika.config import TikaConfig as JTikaConfig
-        from org.apache.tika.detect import CompositeDetector, DefaultDetector
-        from org.apache.tika.language.detect import LanguageDetector
-        from org.apache.tika.mime import MediaType
-        from org.apache.tika.parser import AutoDetectParser, DefaultParser
-
-        self._j_tika_config = JTikaConfig.getDefaultConfig()
-        self._media_type_registry = self._j_tika_config.getMediaTypeRegistry()
-
-        # if user has custom mime types, add them to the media type registry and validate them
-        for custom_mime_type in custom_mime_types:
-            try:
-                root_type, sub_type = custom_mime_type.split("/")
-                self._media_type_registry.addType(MediaType(root_type, sub_type))
-            except ValueError as e:
-                raise TikaMimeTypeError._from_mimetype(custom_mime_type) from e
-
-        # important that default detector is last in the list so that custom detectors are checked first
-        self._detector: Detector = (
-            DefaultDetector()
-            if not custom_detectors
-            else CompositeDetector(self._media_type_registry, JArrayList([*custom_detectors, DefaultDetector()]))
-        )
-
-        self._parser = AutoDetectParser(self._detector, DefaultParser(), *custom_parsers)
-        self._tika = JTika(self._detector, self._parser)
-        self._language_detector = LanguageDetector.getDefaultLanguageDetector()
-        self._models_loaded = False
+        self._j_tika_config: JTikaConfig | None = None
+        self._media_type_registry: MediaTypeRegistry | None = None
+        self._language_detector: LanguageDetector | None = None
+        self._detector: Detector | None = None
+        self._parser: Parser | None = None
+        self._tika: JTika | None = None
 
         if not lazy_load:
-            self._ensure_language_models_loaded()
+            self._get_tika()
+            self._get_language_detector()
 
     #
     # MimeType detection
@@ -233,11 +307,13 @@ class Tika:
             raise TikaInputFileNotFoundError._from_file(input_file)
 
         try:
+            tika = self._get_tika()
+
             if input_stream:
-                return str(self._tika.detect(input_stream))
+                return str(tika.detect(input_stream))
             if input_file:
                 java_path = JPath.of(str(input_file))
-                return str(self._tika.detect(java_path))
+                return str(tika.detect(java_path))
             msg = "Unsupported input type"
             raise TikaInputArgumentsError from ValueError(msg)
         finally:
@@ -302,9 +378,8 @@ class Tika:
         See Also:
             - examples/detect_language.ipynb: Additional language detection examples
         """
-        self._ensure_language_models_loaded()
-
-        result = self._language_detector.detect(content)
+        language_detector = self._get_language_detector()
+        result = language_detector.detect(content)
 
         return TikaDetectLanguageResult(
             language=str(result.getLanguage()),
@@ -399,6 +474,7 @@ class Tika:
         from org.xml.sax import ContentHandler
         from org.xml.sax.helpers import DefaultHandler
 
+        parser = self._get_parser()
         tika_metadata = _get_metadata(obj=obj, input_file_name=input_file_name, content_type=content_type)
 
         ch = DefaultHandler()
@@ -407,7 +483,7 @@ class Tika:
         pc.set(ContentHandler, ch)
         extractor = _RecursiveEmbeddedDocumentExtractor.create(
             parse_context=pc,
-            parser=self._parser,
+            parser=parser,
             output_dir=output_dir,
             max_depth=max_depth,
         )
@@ -421,7 +497,7 @@ class Tika:
         )
 
         with _tika_input_stream(obj, metadata=tika_metadata) as input_stream:
-            self._parser.parse(input_stream, ch, tika_metadata, pc)
+            parser.parse(input_stream, ch, tika_metadata, pc)
 
             return TikaUnpackResult(
                 root_metadata=TikaMetadata._from_java_metadata(tika_metadata),
@@ -634,6 +710,7 @@ class Tika:
             content_type=content_type,
         )
 
+        parser = self._get_parser()
         # Create input stream
         with _tika_input_stream(obj, metadata=metadata) as input_stream:
             match output_mode:
@@ -642,7 +719,7 @@ class Tika:
                         msg = "output_file is required when mode is 'file'"
                         raise TikaInputArgumentsError(msg)
                     return _handle_file_output(
-                        parser=self._parser,
+                        parser=parser,
                         output_file=output_file,
                         input_stream=input_stream,
                         metadata=metadata,
@@ -650,14 +727,14 @@ class Tika:
                     )
                 case "stream":
                     return _handle_stream_output(
-                        parser=self._parser,
+                        parser=parser,
                         input_stream=input_stream,
                         metadata=metadata,
                         output_format=output_format,
                     )
                 case "string":
                     return _handle_string_output(
-                        parser=self._parser,
+                        parser=parser,
                         input_stream=input_stream,
                         metadata=metadata,
                         output_format=output_format,

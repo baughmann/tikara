@@ -1,3 +1,5 @@
+"""Collection of custom exceptions for Tikara and error handling utils."""
+
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
@@ -69,7 +71,7 @@ class TikaInitializationError(TikaError):
 
 def wrap_exceptions(func: Callable[P, R]) -> Callable[P, R]:
     """
-    Wraps a function to convert Java Tika exceptions to Python TikaError.
+    Wrap a function to convert Java Tika exceptions to Python TikaError.
 
     Args:
         func: The function to wrap

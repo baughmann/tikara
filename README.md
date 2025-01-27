@@ -26,6 +26,7 @@ content, metadata = tika.parse("document.pdf")
 - Custom parser and detector support
 - Comprehensive metadata extraction
 - Ships with embedded Tika JAR: works in air-gapped networks. No need to manage libraries.
+- Opinionated Pydantic wrapper over Tika's metadata model, with access to the raw metadata.
 
 ## 📦 Supported Formats
 
