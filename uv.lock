@@ -2204,7 +2204,7 @@ wheels = [
 
 [[package]]
 name = "tikara"
-version = "0.1.4.post1.dev7+g3fdf446.d20250126"
+version = "0.1.5.post1.dev1+gec60e11.d20250127"
 source = { editable = "." }
 dependencies = [
     { name = "jpype1" },

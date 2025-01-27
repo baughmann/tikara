@@ -142,7 +142,7 @@ class _RecursiveEmbeddedDocumentExtractor(Protocol):
                     self._results.append(
                         TikaUnpackedItem(
                             file_path=output_path,
-                            metadata=TikaMetadata._metadata_to_dict(metadata),
+                            metadata=TikaMetadata._from_java_metadata(metadata),
                         )
                     )
 

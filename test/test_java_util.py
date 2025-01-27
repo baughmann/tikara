@@ -13,9 +13,9 @@ from tikara.util.java import (
     _file_output_stream,
     _JavaReaderWrapper,
     _wrap_python_stream,
+    output_stream_or_reader_stream_to_file,
     read_to_string,
     reader_as_binary_stream,
-    stream_to_file,
 )
 
 
@@ -218,7 +218,7 @@ class TestStreamToFile:
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "test.txt"
-            result_path = stream_to_file(StringReader(test_data), output_path)
+            result_path = output_stream_or_reader_stream_to_file(StringReader(test_data), output_path)
 
             assert result_path == output_path
             assert output_path.exists()
@@ -229,7 +229,7 @@ class TestStreamToFile:
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "empty.txt"
-            result_path = stream_to_file(StringReader(""), output_path)
+            result_path = output_stream_or_reader_stream_to_file(StringReader(""), output_path)
 
             assert result_path == output_path
             assert output_path.exists()
@@ -242,7 +242,7 @@ class TestStreamToFile:
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "unicode.txt"
-            result_path = stream_to_file(StringReader(test_data), output_path)
+            result_path = output_stream_or_reader_stream_to_file(StringReader(test_data), output_path)
 
             assert result_path == output_path
             assert output_path.exists()
@@ -255,7 +255,7 @@ class TestStreamToFile:
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             output_path = Path(tmp_dir) / "large.txt"
-            result_path = stream_to_file(StringReader(test_data), output_path)
+            result_path = output_stream_or_reader_stream_to_file(StringReader(test_data), output_path)
 
             assert result_path == output_path
             assert output_path.exists()
@@ -271,7 +271,7 @@ class TestStreamToFile:
             output_path = Path(tmp_dir) / "overwrite.txt"
             output_path.write_text(initial_data)
 
-            result_path = stream_to_file(StringReader(test_data), output_path)
+            result_path = output_stream_or_reader_stream_to_file(StringReader(test_data), output_path)
 
             assert result_path == output_path
             assert output_path.exists()
@@ -283,7 +283,7 @@ class TestStreamToFile:
         invalid_path = Path("/nonexistent/directory/file.txt")
 
         with pytest.raises(OSError):  # noqa: PT011
-            stream_to_file(StringReader("test"), invalid_path)
+            output_stream_or_reader_stream_to_file(StringReader("test"), invalid_path)
 
 
 class TestPipeToStream:

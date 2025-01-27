@@ -261,7 +261,7 @@ def read_to_string(source: "Reader | ByteArrayOutputStream") -> str:
     return "".join(result)
 
 
-def stream_to_file(source: "Reader | ByteArrayOutputStream", output_file: Path) -> Path:
+def output_stream_or_reader_stream_to_file(source: "Reader | ByteArrayOutputStream", output_file: Path) -> Path:
     """Stream the contents to a file.
 
     Args:
@@ -291,6 +291,37 @@ def stream_to_file(source: "Reader | ByteArrayOutputStream", output_file: Path) 
                 break
             java_str = String(char_buffer, 0, read_count)
             f.write(str(java_str))
+    return output_file
+
+
+def input_stream_to_file(input_stream: "InputStream", output_file: Path) -> Path:
+    """Stream the contents of a Java InputStream to a file.
+
+    Args:
+        input_stream: Java InputStream to read from
+        output_file: The file to write the contents to. The file will be overwritten.
+
+    Returns:
+        Path: The path to the output file.
+    """
+    from java.io import BufferedInputStream
+    from java.nio.file import Files, Paths
+
+    if not output_file.parent.exists():
+        output_file.parent.mkdir(parents=True)
+
+    # Convert to Java path and create parent directories
+    java_path = Paths.get(str(output_file))
+    Files.createDirectories(java_path.getParent())
+
+    # Use buffered streams for better performance
+    buffered_input = BufferedInputStream(input_stream)
+
+    with _file_output_stream(output_file) as fos:
+        # Use Java's built-in transferTo method (available since Java 9)
+        # This is more efficient than manual buffer copying
+        buffered_input.transferTo(fos)
+
     return output_file
 
 
