@@ -84,7 +84,6 @@ ALL_VALID_DOCS: list[Path] = [
     Path("./test/data/hello_world.txt"),
     Path("./test/data/test_recursive_embedded.docx"),
     Path("./test/data/2023-half-year-analyses-by-segment.xlsx"),
-    Path("./test/data/CantinaBand3.wav"),
     Path("./test/data/category-level.docx"),
     Path("./test/data/coffee.xls"),
     Path("./test/data/contains-pictures.docx"),
@@ -102,6 +101,13 @@ ALL_VALID_DOCS: list[Path] = [
     Path("./test/data/science-exploration-369p.pptx"),
     Path("./test/data/simple.epub"),
     Path("./test/data/test.zip"),
+    Path("./test/data/Aimer-les-fourmis_fma-140809_001_00-01-39.wav"),
+    Path("./test/data/Arthur.mp3"),
+    Path("./test/data/CantinaBand3.wav"),
+    Path("./test/data/big_buck_bunny_480p_h264.mov"),
+    Path("./test/data/big_buck_bunny_480p_stereo.avi"),
+    Path("./test/data/big_buck_bunny_480p_stereo.ogg"),
+    Path("./test/data/BigBuckBunny_320x180.mp4"),
 ]
 
 ALL_INVALID_DOCS: list[Path] = [
