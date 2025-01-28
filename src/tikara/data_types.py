@@ -81,7 +81,7 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         "character_count_with_spaces": [Office.CHARACTER_COUNT_WITH_SPACES],
         "page_count": [Office.PAGE_COUNT, PagedText.N_PAGES, TIFF.EXIF_PAGE_COUNT],
         "chars_per_page": [PDF.CHARACTERS_PER_PAGE],
-        "table_count": [Office.TABLE_COUNT],
+        "table_count": [Office.TABLE_COUNT, "Number of Tables"],
         "component_count": ["Number of Components"],
         "image_count": [Office.IMAGE_COUNT],
         "hidden_slides": [OfficeOpenXMLExtended.HIDDEN_SLIDES],
@@ -147,8 +147,8 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         ],
         # Multimedia Metadata
         # Generic Multimedia
-        "height": ["height", "Image Height", TIFF.IMAGE_LENGTH, "Source Image Height"],
-        "width": ["width", "Image Width", TIFF.IMAGE_WIDTH, "Source Image Width"],
+        "height": [TIFF.IMAGE_LENGTH, "height", "Image Height", "Source Image Height"],
+        "width": [TIFF.IMAGE_WIDTH, "width", "Image Width", "Source Image Width"],
         "duration": [XMPDM.DURATION, "Duration"],
         "stream_count": ["Stream Count"],
         # Image Metadata
@@ -213,7 +213,7 @@ class TikaMetadata(BaseModel):
         default=None,
         description="The number of characters per page in the document. If multiple pages, list of values.",
     )
-    table_count: str | None = Field(
+    table_count: int | str | None = Field(
         default=None,
         description="The number of tables in the document. This is a string because it can really be anything.",
     )

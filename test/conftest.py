@@ -105,6 +105,10 @@ ALL_VALID_DOCS: list[Path] = [
     Path("./test/data/Arthur.mp3"),
     Path("./test/data/CantinaBand3.wav"),
     Path("./test/data/BigBuckBunny_320x180.mp4"),
+    Path("./test/data/numbers_gs150.jpg"),
+    Path("./test/data/stock_gs200.jpg"),
+    Path("./test/data/captcha1.jpg"),
+    Path("./test/data/plaid_c150.jpg"),
 ]
 
 ALL_INVALID_DOCS: list[Path] = [
