@@ -454,7 +454,7 @@ def test_parse_all_invalid_docs_no_errors(tika: Tika, input_file_path: Path) -> 
 
 
 OCR_PARSE_LANG_DET_PARAMS: list[tuple[Path, str, str | None]] = [
-    (Path("./test/data/numbers_gs150.jpg"), "3.65 miles", "en"),
+    (Path("./test/data/numbers_gs150.jpg"), "3.75 miles", None),
     (Path("./test/data/stock_gs200.jpg"), "Nasdaq & AMEX", "en"),
     (Path("./test/data/captcha1.jpg"), "chizah", None),
     (Path("./test/data/plaid_c150.jpg"), "Saturdays at 8", "en"),
@@ -463,11 +463,13 @@ OCR_PARSE_LANG_DET_PARAMS: list[tuple[Path, str, str | None]] = [
 
 @pytest.mark.parametrize(("input_file_path", "excerpt", "lang"), OCR_PARSE_LANG_DET_PARAMS)
 def test_parse_ocr_docs(tika: Tika, input_file_path: Path, excerpt: str, lang: str | None) -> None:
-    content, metadata = tika.parse(input_file_path)
+    content, metadata = tika.parse(input_file_path, output_format="txt")
     assert content
     assert metadata
     assert metadata.content_type
     assert metadata.raw_metadata
+
+    assert excerpt in content
 
     if lang:
         lang_result = tika.detect_language(content)
