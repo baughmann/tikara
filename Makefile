@@ -13,7 +13,7 @@ test_coverage:
 	@uv run python -m pytest --junitxml=junit.xml  --cov-report term --cov-report xml:coverage.xml --cov=tikara
 
 safety:
-	@uv run safety scan --output screen --save-as html --output safety.html
+	@uv run safety scan --save-as html safety_scan.html
 
 docs:
 	@uv run pydocstyle src
