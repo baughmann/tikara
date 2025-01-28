@@ -451,3 +451,27 @@ def test_parse_all_valid_docs_no_errors(tika: Tika, input_file_path: Path) -> No
 def test_parse_all_invalid_docs_no_errors(tika: Tika, input_file_path: Path) -> None:
     with pytest.raises(TikaError):
         tika.parse(input_file_path)
+
+
+OCR_PARSE_LANG_DET_PARAMS: list[tuple[Path, str, str | None]] = [
+    (Path("./test/data/numbers_gs150.jpg"), "3.65 miles", "en"),
+    (Path("./test/data/stock_gs200.jpg"), "Nasdaq & AMEX", "en"),
+    (Path("./test/data/captcha1.jpg"), "chizah", None),
+    (Path("./test/data/plaid_c150.jpg"), "Saturdays at 8", "en"),
+]
+
+
+@pytest.mark.parametrize(("input_file_path", "excerpt", "lang"), OCR_PARSE_LANG_DET_PARAMS)
+def test_parse_ocr_docs(tika: Tika, input_file_path: Path, excerpt: str, lang: str | None) -> None:
+    content, metadata = tika.parse(input_file_path)
+    assert content
+    assert metadata
+    assert metadata.content_type
+    assert metadata.raw_metadata
+
+    if lang:
+        lang_result = tika.detect_language(content)
+        assert lang_result
+        assert lang_result.language == lang
+    else:
+        pytest.warns(UserWarning, match=f"Language detection skipped for {input_file_path.name}")
