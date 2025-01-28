@@ -70,6 +70,7 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
             "Compression",
             XMPDM.AUDIO_COMPRESSOR,
             XMPDM.VIDEO_COMPRESSOR,
+            "Compressor ID",
         ],
         # Document Counts
         "paragraph_count": [Office.PARAGRAPH_COUNT],
@@ -106,14 +107,14 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         "content_type_override": [TikaCoreProperties.CONTENT_TYPE_USER_OVERRIDE],
         "content_length": [Metadata.CONTENT_LENGTH],
         # Document Content Metadata
-        "title": [DublinCore.TITLE, PDF.DOC_INFO_TITLE, DublinCore.SUBJECT, PDF.DOC_INFO_SUBJECT],
+        "title": [DublinCore.TITLE, PDF.DOC_INFO_TITLE, DublinCore.SUBJECT, PDF.DOC_INFO_SUBJECT, "Title"],
         "description": [DublinCore.DESCRIPTION],
         "type": [DublinCore.TYPE],
         "keywords": [Office.KEYWORDS, IPTC.KEYWORDS, PDF.DOC_INFO_KEY_WORDS, "meta:keyword"],
         "notes": [OfficeOpenXMLExtended.NOTES],
         # Author Information
         "company": [OfficeOpenXMLExtended.COMPANY],
-        "creator": [DublinCore.CREATOR, Office.LAST_AUTHOR, PDF.DOC_INFO_CREATOR, PDF.DOC_INFO_PRODUCER],
+        "creator": [DublinCore.CREATOR, Office.LAST_AUTHOR, PDF.DOC_INFO_CREATOR, PDF.DOC_INFO_PRODUCER, "Artist"],
         "publisher": [DublinCore.PUBLISHER],
         "contributor": [DublinCore.CONTRIBUTOR],
         # Language
@@ -146,8 +147,8 @@ def _get_metadata_key_mappings() -> dict[str, list["Property | str"]]:
         ],
         # Multimedia Metadata
         # Generic Multimedia
-        "height": ["height", "Image Height", TIFF.IMAGE_LENGTH],
-        "width": ["width", "Image Width", TIFF.IMAGE_WIDTH],
+        "height": ["height", "Image Height", TIFF.IMAGE_LENGTH, "Source Image Height"],
+        "width": ["width", "Image Width", TIFF.IMAGE_WIDTH, "Source Image Width"],
         "duration": [XMPDM.DURATION, "Duration"],
         "stream_count": ["Stream Count"],
         # Image Metadata

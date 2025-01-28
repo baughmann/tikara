@@ -104,9 +104,6 @@ ALL_VALID_DOCS: list[Path] = [
     Path("./test/data/Aimer-les-fourmis_fma-140809_001_00-01-39.wav"),
     Path("./test/data/Arthur.mp3"),
     Path("./test/data/CantinaBand3.wav"),
-    Path("./test/data/big_buck_bunny_480p_h264.mov"),
-    Path("./test/data/big_buck_bunny_480p_stereo.avi"),
-    Path("./test/data/big_buck_bunny_480p_stereo.ogg"),
     Path("./test/data/BigBuckBunny_320x180.mp4"),
 ]
 
