@@ -26,6 +26,7 @@ SKIP_METADATA_KEYS: set[str] = {
     "X-TIKA:content_handler",
     "X-TIKA:parse_time_millis",
     "X-TIKA:embedded_depth",
+    "X-TIKA:Parsed-By",
 }
 
 
