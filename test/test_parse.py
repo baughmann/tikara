@@ -411,7 +411,7 @@ def custom_detector() -> "Detector":
         (
             "readme",
             "text/markdown",
-            "jdk.proxy",
+            "proxy",
         ),
     ],
 )
