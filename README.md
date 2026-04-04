@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/tikara_logo.svg" width="100" alt="Tikara Logo" />
 
-![Coverage](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/coverage.xml&query=/coverage/@line-rate%20*%20100&suffix=%25&color=brightgreen&label=coverage) ![Tests](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/junit.xml&query=/testsuites/testsuite/@tests&label=tests&color=green) ![PyPI](https://img.shields.io/pypi/v/tikara) ![GitHub License](https://img.shields.io/github/license/baughmann/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/baughmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/baughmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
+![Coverage](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/coverage.xml&query=/coverage/@line-rate%20*%20100&suffix=%25&color=brightgreen&label=coverage) ![Tests](https://img.shields.io/badge/dynamic/xml?url=https://raw.githubusercontent.com/baughmann/tikara/refs/heads/master/junit.xml&query=/testsuites/testsuite/@tests&label=tests&color=green) [![Security Scan](https://github.com/baughmann/tikara/actions/workflows/security.yml/badge.svg)](https://htmlpreview.github.io/?https://github.com/baughmann/tikara/blob/master/safety_scan.html) ![PyPI](https://img.shields.io/pypi/v/tikara) ![GitHub License](https://img.shields.io/github/license/baughmann/tikara) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tikara) ![GitHub issues](https://img.shields.io/github/issues/baughmann/tikara) ![GitHub pull requests](https://img.shields.io/github/issues-pr/baughmann/tikara) ![GitHub stars](https://img.shields.io/github/stars/baughmann/tikara?style=social)
 
 ## 🚀 Overview
 
@@ -194,22 +194,51 @@ for item in results:
 ### Environment Setup
 
 1. Ensure that you have the [system dependencies](#system-dependencies) installed
-2. Install uv:
+2. Install [uv](https://docs.astral.sh/uv/):
 
    ```bash
-   pip install uv
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-3. Install python dependencies and create the Virtual Environment: `uv sync`
+3. Install python dependencies and create the Virtual Environment:
+
+   ```bash
+   make install
+   ```
 
 ### Common Tasks
 
+Run `make` (or `make help`) to see all available targets. The most common ones:
+
 ```bash
-make ruff        # Format and lint code
-make test        # Run test suite
-make docs        # Generate documentation
-make stubs       # Generate Java stubs
-make prepush     # Run all checks (ruff, test, coverage, safety)
+# Setup
+make install         # Install all dependencies (including dev)
+make stubs           # Regenerate Java type stubs from the Tika JAR
+
+# Lint & Format
+make lint            # Run ruff linter (with auto-fix)
+make format          # Run ruff formatter
+make ruff            # Run linter and formatter together
+
+# Test
+make test            # Run tests with verbose output
+make test-fast       # Run tests, skip slow benchmark/isolated markers
+make test-coverage   # Run tests with coverage report (XML + terminal)
+
+# Docs
+make docs            # Build Sphinx HTML docs
+make docs-open       # Build docs and open in browser
+
+# Security
+make safety          # Run safety dependency vulnerability scan
+
+# Build & Release
+make build           # Build sdist and wheel
+make clean           # Remove build artifacts, caches, and generated reports
+
+# CI / Pre-push
+make ci              # Run full CI suite (lint → test → safety → docs)
+make prepush         # Alias for ci — run before pushing
 ```
 
 ## 🤔 When to Use Tikara
@@ -274,7 +303,7 @@ Tikara builds on the shoulders of giants:
 Contributions welcome! The project uses Make for development tasks:
 
 ```bash
-make prepush     # Run all checks (format, lint, test, coverage, safety)
+make prepush     # Run full CI suite (lint, test, coverage, safety, docs)
 ```
 
 For developing custom parsers/detectors, Java stubs can be generated:
