@@ -346,7 +346,7 @@ def test_parse_content_compare_with_tika_server(
     # TODO(#13): Investigate OCR interleaving behaviour and either expose a skip-embedded
     # option in the public API or change the comparison strategy here accordingly.
     similarity = SequenceMatcher(None, tika_content, our_content).ratio()
-    assert similarity >= 0.95, f"Content similarity {similarity:.1%} is below threshold"
+    assert similarity >= 0.95, f"Content similarity {similarity:.1%} is below threshold"  # noqa: PLR2004
 
 
 @pytest.fixture
