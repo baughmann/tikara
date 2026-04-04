@@ -20,21 +20,11 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Run Safety CLI to check for vulnerabilities
+        uses: pyupio/safety-action@v1
         with:
-          python-version: "3.12"
-
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Install dependencies
-        run: uv sync --all-groups
-
-      - name: Run Safety vulnerability scan
-        env:
-          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
-        run: uv run safety scan --key "$SAFETY_API_KEY" --save-as html safety_scan.html
+          api-key: ${{ secrets.SAFETY_API_KEY }}
+          args: --save-as html safety_scan.html
 
       - name: Upload safety report artifact
         if: always()
