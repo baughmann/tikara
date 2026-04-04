@@ -1,26 +1,120 @@
-stubs:
-	@uv run python -m stubgenj --classpath "src/tikara/jars/tika-app-3.0.0.jar" --convert-strings org.apache.tika java org.apache.commons org.w3c.dom org.xml.sax javax.xml javax.accessibility javax.crypto org.apache.poi --output-dir stubs --no-stubs-suffix
-# no idea why it generates stubs for jpype, but we have to remove them
+UV := uv run
+TIKA_JAR := src/tikara/jars/tika-app-3.0.0.jar
+
+.DEFAULT_GOAL := help
+
+# ── Help ──────────────────────────────────────────────────────────────────────
+
+.PHONY: help
+help: ## Show this help message
+	@echo "tikara — python wrapper for apache tika"
+	@echo ""
+	@echo "Usage: make <target>"
+	@echo ""
+	@awk 'BEGIN {FS = ":.*##"; section=""} \
+		/^## / { section=substr($$0, 4); printf "\n\033[1m%s\033[0m\n", section } \
+		/^[a-zA-Z_-]+:.*##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@echo ""
+
+# ── Setup ─────────────────────────────────────────────────────────────────────
+
+## Setup
+
+.PHONY: install
+install: ## Install all dependencies (including dev)
+	uv sync --all-groups
+
+.PHONY: stubs
+stubs: ## Regenerate Java type stubs from the Tika JAR
+	@$(UV) python -m stubgenj \
+		--classpath "$(TIKA_JAR)" \
+		--convert-strings \
+		org.apache.tika java org.apache.commons org.w3c.dom org.xml.sax \
+		javax.xml javax.accessibility javax.crypto org.apache.poi \
+		--output-dir stubs --no-stubs-suffix
 	@rm -rf stubs/jpype-stubs
 
-ruff:
-	@uv run ruff check . --fix && ruff format
+# ── Lint & Format ─────────────────────────────────────────────────────────────
 
-test:
-	@uv run python -m pytest -vv -s
+## Lint & Format
 
-test_coverage:
-	@uv run python -m pytest --junitxml=junit.xml  --cov-report term --cov-report xml:coverage.xml --cov=tikara
+.PHONY: lint
+lint: ## Run ruff linter (with auto-fix)
+	@$(UV) ruff check . --fix
 
-safety:
-	@uv run safety scan --save-as html safety_scan.html
+.PHONY: format
+format: ## Run ruff formatter
+	@$(UV) ruff format .
 
-docs:
-	@uv run pydocstyle src
-	@uv run sphinx-apidoc -f -o docs/source/ . "test*"
-	@uv run sphinx-build -b html docs/source/ docs/build/html
+.PHONY: ruff
+ruff: lint format ## Run linter and formatter together
 
+# ── Test ──────────────────────────────────────────────────────────────────────
 
-prepush: ruff test_coverage safety docs
+## Test
 
-.PHONY: stubs ruff test test_coverage safety docs prepush
+.PHONY: test
+test: ## Run tests with verbose output
+	@$(UV) python -m pytest -vv -s
+
+.PHONY: test-coverage
+test-coverage: ## Run tests with coverage report (XML + terminal)
+	@$(UV) python -m pytest \
+		--junitxml=junit.xml \
+		--cov-report term \
+		--cov-report xml:coverage.xml \
+		--cov=tikara
+
+.PHONY: test-fast
+test-fast: ## Run tests, skip slow benchmark/isolated markers
+	@$(UV) python -m pytest -vv -s -m "not benchmark and not isolated"
+
+# ── Security ──────────────────────────────────────────────────────────────────
+
+## Security
+
+.PHONY: safety
+safety: ## Run safety dependency vulnerability scan
+	@$(UV) safety scan --save-as html safety_scan.html
+
+# ── Docs ──────────────────────────────────────────────────────────────────────
+
+## Docs
+
+.PHONY: docs
+docs: ## Build Sphinx HTML docs
+	@$(UV) pydocstyle src
+	@$(UV) sphinx-apidoc -f -o docs/source/ . "test*"
+	@$(UV) sphinx-build -b html docs/source/ docs/build/html
+
+.PHONY: docs-open
+docs-open: docs ## Build docs and open in browser
+	@xdg-open docs/build/html/index.html 2>/dev/null || open docs/build/html/index.html
+
+# ── Build & Release ───────────────────────────────────────────────────────────
+
+## Build & Release
+
+.PHONY: build
+build: ## Build sdist and wheel
+	uv build
+
+.PHONY: clean
+clean: ## Remove build artifacts, caches, and generated reports
+	@rm -rf dist/ build/ .eggs/ *.egg-info
+	@rm -rf docs/build/
+	@rm -rf .pytest_cache/ .ruff_cache/ .coverage htmlcov/
+	@rm -f junit.xml coverage.xml safety_scan.html
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null; true
+	@find . -name "*.pyc" -delete 2>/dev/null; true
+	@echo "Clean."
+
+# ── CI / Pre-push ─────────────────────────────────────────────────────────────
+
+## CI / Pre-push
+
+.PHONY: ci
+ci: ruff test-coverage safety docs ## Run full CI suite (lint → test → safety → docs)
+
+.PHONY: prepush
+prepush: ci ## Alias for ci — run before pushing

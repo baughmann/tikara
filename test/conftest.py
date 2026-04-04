@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from pathlib import Path
+import shutil
 
 import pytest
 from testcontainers.core.container import DockerContainer
@@ -7,6 +8,18 @@ from testcontainers.core.waiting_utils import wait_for_logs
 
 from tikara.core import Tika
 from tikara.util.java import initialize_jvm
+
+
+@pytest.fixture(scope="session", autouse=True)
+def tesseract() -> None:
+    """Abort the entire test session if Tesseract OCR is not installed."""
+    if shutil.which("tesseract") is None:
+        pytest.exit(
+            "Tesseract OCR is not installed — install it before running the test suite.\n"
+            "  Ubuntu/Debian: sudo apt-get install tesseract-ocr\n"
+            "  macOS:         brew install tesseract",
+            returncode=1,
+        )
 
 
 @pytest.fixture(autouse=True)

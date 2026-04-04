@@ -205,3 +205,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "test/*" = ["ANN", "S", "PLR0913"]
+
+[tool.pyright]
+stubPath = "stubs"
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
