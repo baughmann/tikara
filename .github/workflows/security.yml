@@ -34,7 +34,7 @@ jobs:
       - name: Run Safety vulnerability scan
         env:
           SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
-        run: uv run safety scan --save-as html safety_scan.html
+        run: uv run safety scan --key "$SAFETY_API_KEY" --save-as html safety_scan.html
 
       - name: Upload safety report artifact
         if: always()
