@@ -1,13 +1,26 @@
+import shutil
 from collections.abc import Generator
 from pathlib import Path
-import shutil
 
+import jpype
 import pytest
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.waiting_utils import wait_for_logs
 
 from tikara.core import Tika
 from tikara.util.java import initialize_jvm
+
+
+@pytest.fixture(scope="session", autouse=True)
+def jvm_lifecycle() -> Generator[None, None, None]:
+    """Explicitly shut down the JVM at the end of the session.
+
+    Without this, JPype's atexit hook races with pytest-cov's atexit hook and
+    causes a segfault (exit 139) after all tests have passed.
+    """
+    yield
+    if jpype.isJVMStarted():
+        jpype.shutdownJVM()
 
 
 @pytest.fixture(scope="session", autouse=True)

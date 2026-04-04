@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from io import BufferedIOBase, UnsupportedOperation
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, BinaryIO, TypeGuard, cast, override
+from typing import TYPE_CHECKING, Any, BinaryIO, Self, TypeGuard, cast, override
 
 import jpype
 import jpype.imports
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 #
 # JVM utilities
 #
-TIKA_VERSION = "3.0.0"
+TIKA_VERSION = "3.2.3"
 
 
 def get_jars() -> list[Path]:
@@ -198,10 +198,11 @@ class _JavaReaderWrapper(BinaryIO):
 
     @override
     def flush(self) -> None:
+        # No-op for _JavaReaderWrapper
         pass
 
     @override
-    def __enter__(self) -> "_JavaReaderWrapper":
+    def __enter__(self) -> Self:
         return self
 
     @override
@@ -232,7 +233,7 @@ def _wrap_python_stream(python_stream: BinaryIO) -> "PipedInputStream":
     def pipe_data() -> None:
         with output_stream:
             while chunk := python_stream.read(8192):
-                output_stream.write(bytearray(chunk))
+                output_stream.write(bytearray(chunk))  # pyright: ignore[reportCallIssue, reportArgumentType]
 
     executor.submit(pipe_data)
     return input_stream

@@ -3,12 +3,8 @@
 from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from typing import ParamSpec, TypeVar
 
 from jpype.types import JException
-
-P = ParamSpec("P")
-R = TypeVar("R")
 
 
 class TikaError(Exception):
@@ -69,9 +65,8 @@ class TikaInitializationError(TikaError):
     """Raised when the Tika server fails to initialize."""
 
 
-def wrap_exceptions(func: Callable[P, R]) -> Callable[P, R]:
-    """
-    Wrap a function to convert Java Tika exceptions to Python TikaError.
+def wrap_exceptions[**P, R](func: Callable[P, R]) -> Callable[P, R]:
+    """Wrap a function to convert Java Tika exceptions to Python TikaError.
 
     Args:
         func: The function to wrap
@@ -85,6 +80,7 @@ def wrap_exceptions(func: Callable[P, R]) -> Callable[P, R]:
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        """Invoke the wrapped function, converting Java exceptions to TikaError."""
         try:
             return func(*args, **kwargs)
         except JException as e:

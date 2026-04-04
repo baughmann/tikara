@@ -1,5 +1,7 @@
 UV := uv run
-TIKA_JAR := src/tikara/jars/tika-app-3.0.0.jar
+# Also update TIKA_VERSION in src/tikara/util/java.py to match
+TIKA_VERSION := 3.2.3
+TIKA_JAR := src/tikara/jars/tika-app-$(TIKA_VERSION).jar
 
 .DEFAULT_GOAL := help
 
@@ -23,6 +25,14 @@ help: ## Show this help message
 .PHONY: install
 install: ## Install all dependencies (including dev)
 	uv sync --all-groups
+
+.PHONY: download-tika
+download-tika: ## Download the Tika app JAR (set TIKA_VERSION to override)
+	@mkdir -p src/tikara/jars
+	@echo "Downloading tika-app-$(TIKA_VERSION).jar..."
+	@curl -fL -o "$(TIKA_JAR)" \
+		"https://repo1.maven.org/maven2/org/apache/tika/tika-app/$(TIKA_VERSION)/tika-app-$(TIKA_VERSION).jar"
+	@echo "Saved to $(TIKA_JAR)"
 
 .PHONY: stubs
 stubs: ## Regenerate Java type stubs from the Tika JAR
