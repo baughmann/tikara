@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 #
 # JVM utilities
 #
-TIKA_VERSION = "3.2.3"
+TIKA_VERSION = "3.3.1"
 
 
 def get_jars() -> list[Path]:
