@@ -93,7 +93,6 @@ safety: ## Run safety dependency vulnerability scan
 
 .PHONY: docs
 docs: ## Build Sphinx HTML docs
-	@$(UV) sphinx-apidoc -f -o docs/source/ . "test*"
 	@$(UV) sphinx-build -b html docs/source/ docs/build/html
 
 .PHONY: docs-open

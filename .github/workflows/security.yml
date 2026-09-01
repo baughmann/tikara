@@ -9,6 +9,13 @@ on:
     - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
   workflow_dispatch:
 
+concurrency:
+  # Tests and Security Scan both commit generated reports back to master. Without a
+  # shared group they race and the second push is rejected non-fast-forward. Queue
+  # them instead of cancelling so neither report is dropped.
+  group: report-commits-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   safety:
     runs-on: ubuntu-latest

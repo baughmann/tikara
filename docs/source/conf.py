@@ -23,7 +23,6 @@ extensions = [
     "myst_parser",
     'sphinx.ext.doctest',
     "sphinx.ext.autodoc",
-    "sphinx.ext.autodoc.typehints",
     "sphinx_design"
 
 ]
