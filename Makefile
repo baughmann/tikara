@@ -1,6 +1,6 @@
 UV := uv run
 # Also update TIKA_VERSION in src/tikara/util/java.py to match
-TIKA_VERSION := 3.2.3
+TIKA_VERSION := 3.3.1
 TIKA_JAR := src/tikara/jars/tika-app-$(TIKA_VERSION).jar
 
 .DEFAULT_GOAL := help

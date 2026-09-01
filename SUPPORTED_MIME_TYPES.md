@@ -1306,6 +1306,7 @@
 - `image/aces`
 - `image/avif`
 - `image/bmp`
+- `image/bmp; format=compressed`
 - `image/cgm`
 - `image/emf`
 - `image/example`
@@ -1481,6 +1482,7 @@
 - `text/html`
 - `text/iso19139+xml`
 - `text/javascript`
+- `text/markdown`
 - `text/parityfec`
 - `text/plain`
 - `text/prs.fallenstein.rst`
@@ -1597,7 +1599,6 @@
 - `text/x-vcard`
 - `text/x-verilog`
 - `text/x-vhdl`
-- `text/x-web-markdown`
 - `text/x-yacc`
 - `text/x-yaml`
 - `video/3gpp`

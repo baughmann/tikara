@@ -10,9 +10,31 @@ from tikara.core import Tika
 from tikara.data_types import TikaUnpackResult
 from tikara.error_handling import TikaError
 
+# Each level of test_recursive_embedded.docx nests a further zip, so raising max_depth
+# must strictly widen the result. Tika <= 3.2.3 stopped after the first child of
+# embed1.zip and returned the same three files for every depth >= 2; the depth-3 case
+# below is what pins the recursion down.
 UNPACK_RECURSIVE_TEST_CASES: list[tuple[str, list[str], int]] = [
     ("test_recursive_embedded_docx", ["embed1.zip", "image1.emf"], 1),
-    ("test_recursive_embedded_docx", ["embed1.zip", "image1.emf", "embed1/embed1a.txt"], 2),
+    (
+        "test_recursive_embedded_docx",
+        ["embed1.zip", "image1.emf", "embed1/embed1a.txt", "embed1/embed1b.txt", "embed1/embed2.zip"],
+        2,
+    ),
+    (
+        "test_recursive_embedded_docx",
+        [
+            "embed1.zip",
+            "image1.emf",
+            "embed1/embed1a.txt",
+            "embed1/embed1b.txt",
+            "embed1/embed2.zip",
+            "embed2/embed2a.txt",
+            "embed2/embed2b.txt",
+            "embed2/embed3.zip",
+        ],
+        3,
+    ),
     ("demo_docx", ["image2.png", "image3.png", "image4.png"], 1),
     ("demo_docx", ["image2.png", "image3.png", "image4.png"], 2),
     ("basic_txt", [], 1),
