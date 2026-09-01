@@ -27,8 +27,7 @@ if TYPE_CHECKING:
 
 
 class _RecursiveEmbeddedDocumentExtractor(Protocol):
-    """
-    Extracts embedded documents from a parent document using Apache Tika.
+    """Extracts embedded documents from a parent document using Apache Tika.
 
     Writes the extracted documents to the specified output directory and keeps track of the metadata and file
     paths extracted.
@@ -176,8 +175,7 @@ def _get_metadata(
     input_file_name: str | Path | None = None,
     content_type: str | None = None,
 ) -> "Metadata":
-    """
-    Fill the metadata object with the content type and resource name of the input stream.
+    """Fill the metadata object with the content type and resource name of the input stream.
 
     Replicates TikaServer's `org.apache.tika.server.core.resource.TikaResource.fillMetadata` logic
     """

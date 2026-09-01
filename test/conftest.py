@@ -5,10 +5,10 @@ from pathlib import Path
 import jpype
 import pytest
 from testcontainers.core.container import DockerContainer
-from testcontainers.core.waiting_utils import wait_for_logs
+from testcontainers.core.wait_strategies import LogMessageWaitStrategy
 
 from tikara.core import Tika
-from tikara.util.java import initialize_jvm
+from tikara.util.java import TIKA_VERSION, initialize_jvm
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -93,11 +93,19 @@ def test_recursive_embedded_docx() -> Path:
 
 @pytest.fixture(scope="session")
 def tika_container() -> Generator[DockerContainer, None, None]:
-    """Create a Tika instance using the full Tika server."""
-    tika_container = DockerContainer("apache/tika:latest-full").with_exposed_ports(9998)
+    """Create a Tika instance using the full Tika server.
+
+    The image is pinned to the same Tika version as the bundled JAR
+    (:data:`tikara.util.java.TIKA_VERSION`) so the comparison tests are
+    apples-to-apples. The floating ``latest-full`` tag drifts to new major
+    versions that move endpoints and change parser output.
+    """
+    tika_container = (
+        DockerContainer(f"apache/tika:{TIKA_VERSION}.0-full")
+        .with_exposed_ports(9998)
+        .waiting_for(LogMessageWaitStrategy("Started Apache Tika server"))
+    )
     tika_container.start()
-    # Wait for Tika server to be ready
-    wait_for_logs(tika_container, "Started Apache Tika server")
 
     yield tika_container
 

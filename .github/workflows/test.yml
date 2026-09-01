@@ -13,12 +13,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -28,8 +28,9 @@ jobs:
           sudo apt-get install -y tesseract-ocr
 
       - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
 
       - name: Install dependencies
         run: |
@@ -40,7 +41,7 @@ jobs:
           uv run python -m pytest --junitxml=junit.xml --cov-report xml:coverage.xml --cov=tikara
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: |
@@ -48,7 +49,11 @@ jobs:
             coverage.xml
 
       - name: Commit reports
-        uses: stefanzweifel/git-auto-commit-action@v5
+        # Only on pushes to master. Committing back to a PR branch re-triggers this
+        # workflow with a bot-authored commit, which GitHub parks in `action_required`
+        # and never runs. Mirrors the guard in security.yml.
+        if: github.event_name != 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Add test, benchmark and coverage reports
           file_pattern: junit.xml coverage.xml
