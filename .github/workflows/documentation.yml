@@ -43,10 +43,11 @@ jobs:
           uv sync
           uv pip install -e .
 
-      - name: Sphinx APIDoc
-        run: |
-          uv run sphinx-apidoc -f -o docs/source/ src/tikara
-
+      # No sphinx-apidoc step: AutoAPI (see docs/source/conf.py) documents the
+      # package by parsing the source, and its output is what index.rst links to.
+      # sphinx-apidoc emitted extra automodule stubs that were in no toctree but
+      # were still read, importing tikara and making autodoc touch JPype-backed
+      # attributes with no JVM running.
       - name: Sphinx build
         run: |
           uv run sphinx-build -b html docs/source/ docs/build/html
