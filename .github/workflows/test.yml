@@ -49,6 +49,10 @@ jobs:
             coverage.xml
 
       - name: Commit reports
+        # Only on pushes to master. Committing back to a PR branch re-triggers this
+        # workflow with a bot-authored commit, which GitHub parks in `action_required`
+        # and never runs. Mirrors the guard in security.yml.
+        if: github.event_name != 'pull_request'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Add test, benchmark and coverage reports
