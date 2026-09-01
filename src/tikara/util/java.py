@@ -56,8 +56,7 @@ def get_jars() -> list[Path]:
 
 @wrap_exceptions
 def initialize_jvm(tika_jar_override: Path | None = None, extra_jars: list[Path] | None = None) -> None:
-    """
-    Initialize the JVM.
+    """Initialize the JVM.
 
     Tries to start the JVM with the Tika JAR file(s) in the classpath.
     If the JVM is already started, checks if the Tika JAR file(s) are in the classpath.

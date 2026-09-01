@@ -29,7 +29,7 @@ SKIP_METADATA_KEYS: set[str] = {
     "X-TIKA:embedded_depth",
 }
 
-# The Tika server (apache/tika:latest-full) returns XMP namespace variants of standard
+# The Tika server container returns XMP namespace variants of standard
 # Dublin Core / PDF metadata that the local tika-app JAR does not extract.
 # TODO(#13): Investigate root cause and resolve properly.
 PDF_XMP_SKIP_KEYS: set[str] = {
