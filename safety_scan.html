@@ -32,7 +32,7 @@
                                     <p class="card-text">Vulnerabilities Reported (<a href="#vulnerabilities-found">details &#8595;</a>)</p>
                                     <h5 class="card-title fs-3">0</h5>
                                     
-                                        <p>Found vulnerabilities that were ignored: 1</p>
+                                        <p>Found vulnerabilities that were ignored: 2</p>
                                     
                                 </div>
                             </div>
@@ -45,7 +45,7 @@
                             <h5 class="mb-2">Meta-data</h5>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p class="my-1"><span class="fw-bold">Time</span>: 2026-11-02 14:19:56.272791</p>
+                                    <p class="my-1"><span class="fw-bold">Time</span>: 2026-11-09 14:46:42.320161</p>
                                     <p class="my-1"><span class="fw-bold">Safety version</span>: 3.3.1</p>
                                     <p class="my-1">
                                         
@@ -147,6 +147,40 @@
                     </div>
                 </div>
 
+                
+                    <div class="row">
+                        <div class="col-12" id="vulnerabilities-ignored">
+                            <h4 class="mt-4 mb-3 px-2">Vulnerabilities ignored [ <a href="#vulnerabilities-ignored">#</a> ]</h4>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Vulnerability ID</th>
+                                        <th>Package name</th>
+                                        <th>Version/Spec</th>
+                                        <th>Notes</th>
+                                        <th>Expires</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    
+                                        <tr>
+                                            <td><a href="https://data.safetycli.com/v/SFTY-20261029-23230/eda" target="_blank">SFTY-20261029-23230</a></td>
+                                            <td>pydantic</td>
+                                            <td>
+                                                
+                                                    pydantic>=2.10.5
+                                                
+                                            </td>
+                                            <td>This vulnerability is being ignored due to the 'ignore-unpinned-requirements' flag (default True). To change this, set 'ignore-unpinned-requirements' to False under 'security' in your policy file. See https://docs.pyup.io/docs/safety-20-policy-file for more information.</td>
+                                            <td>-</td>
+                                        </tr>
+                                    
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 
 
                 
